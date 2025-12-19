@@ -588,7 +588,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: WebCamTextureManagerPrefab
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1748868316715821956, guid: abfaad578d05e4a09838223134c41c46, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -600,19 +601,11 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 59405332}
+    - targetCorrespondingSourceObject: {fileID: 7847449403238870662, guid: abfaad578d05e4a09838223134c41c46,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 59405333}
   m_SourcePrefab: {fileID: 100100000, guid: abfaad578d05e4a09838223134c41c46, type: 3}
---- !u!114 &59405327 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1748868316715821956, guid: abfaad578d05e4a09838223134c41c46,
-    type: 3}
-  m_PrefabInstance: {fileID: 59405326}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 59405328}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef9a7893e57c04c0db4114c70954b915, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &59405328 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7847449403238870662, guid: abfaad578d05e4a09838223134c41c46,
@@ -645,8 +638,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a90cadb8592f20440843d07a678ea108, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  webcamManager: {fileID: 59405327}
+  webcamManager: {fileID: 59405333}
   _saveSnapshotButton: 0
+--- !u!114 &59405333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 59405328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1afe0e470ba527d4f9d94cfda0f9fa87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Eye: 0
+  RequestedResolution: {x: 0, y: 0}
+  CameraPermissions: {fileID: 0}
 --- !u!1 &60626848
 GameObject:
   m_ObjectHideFlags: 0
@@ -1261,7 +1269,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settings: {fileID: 11400000, guid: f6aa6444ce9bb0045a2caef8196d36fb, type: 2}
-  camMgr: {fileID: 59405327}
+  camMgr: {fileID: 0}
 --- !u!114 &226138086
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1295,7 +1303,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c10201487576dee4b80d7503bf5d006b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_webCamTextureManager: {fileID: 59405327}
+  m_webCamTextureManager: {fileID: 0}
   m_cameraCanvas: {fileID: 7985735941236483369}
   m_canvasDistance: 1
   depthQuad: {fileID: 1051852844}
@@ -8523,7 +8531,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _monoscopic: 0
   _sharpenType: 0
-  _enableDynamicResolution: 1
+  _enableDynamicResolution: 0
   minDynamicResolutionScale: 0.7
   maxDynamicResolutionScale: 1.3
   quest2MinDynamicResolutionScale: 0.7
@@ -8575,6 +8583,7 @@ MonoBehaviour:
   requestEyeTrackingPermissionOnStartup: 0
   requestScenePermissionOnStartup: 1
   requestRecordAudioPermissionOnStartup: 0
+  requestPassthroughCameraAccessPermissionOnStartup: 0
   _localDimming: 1
   _trackingOriginType: 1
   usePositionTracking: 1
@@ -12891,7 +12900,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_webCamTextureManager
       value: 
-      objectReference: {fileID: 59405327}
+      objectReference: {fileID: 0}
     - target: {fileID: 5841989571830368855, guid: 5bf474b46cc73474cae478c4b9b8246a,
         type: 3}
       propertyPath: m_Camera
