@@ -55,7 +55,7 @@ MonoBehaviour:
       - rid: 5300852241583308919
       - rid: 2156385601029406740
       - rid: 5300852241583308920
-      - rid: 2156385690672693502
+      - rid: -2
       - rid: 843503688939470848
       - rid: 843503688939470849
       - rid: 843503688939470850
@@ -96,6 +96,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 843503688939470848
       type: {class: ScreenSpaceAmbientOcclusionPersistentResources, ns: UnityEngine.Rendering.Universal,
         asm: Unity.RenderPipelines.Universal.Runtime}
