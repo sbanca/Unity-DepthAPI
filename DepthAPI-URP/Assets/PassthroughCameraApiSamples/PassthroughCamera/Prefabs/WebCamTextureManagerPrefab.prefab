@@ -9,7 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7047676844597515174}
-  - component: {fileID: 1748868316715821956}
+  - component: {fileID: 766937029272742929}
+  - component: {fileID: 3155958272935594558}
+  - component: {fileID: 2840333169921410720}
   m_Layer: 0
   m_Name: WebCamTextureManagerPrefab
   m_TagString: Untagged
@@ -32,7 +34,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1748868316715821956
+--- !u!114 &766937029272742929
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,9 +43,37 @@ MonoBehaviour:
   m_GameObject: {fileID: 7847449403238870662}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83522adf58e54bb3a03b0f5bcfaa8a4f, type: 3}
+  m_Script: {fileID: 11500000, guid: 6f5e9631f3cd04da0acc02bc5b51f5d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PermissionRequestsOnStartup:
+  - com.oculus.permission.USE_SCENE
+--- !u!114 &3155958272935594558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7847449403238870662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a90cadb8592f20440843d07a678ea108, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  webcamManager: {fileID: 2840333169921410720}
+  _saveSnapshotButton: 0
+--- !u!114 &2840333169921410720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7847449403238870662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1afe0e470ba527d4f9d94cfda0f9fa87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Eye: 0
-  RequestedResolution: {x: 0, y: 0}
-  CameraPermissions: {fileID: 0}
+  RequestedResolution: {x: 1280, y: 960}
+  CameraPermissions: {fileID: 766937029272742929}

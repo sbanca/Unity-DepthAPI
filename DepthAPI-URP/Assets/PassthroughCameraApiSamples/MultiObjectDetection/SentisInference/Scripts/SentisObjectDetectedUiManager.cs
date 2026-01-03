@@ -37,8 +37,11 @@ namespace PassthroughCameraSamples.MultiObjectDetection
                 yield return null;
             }
 
-            // Set the 'requestedResolution' and enable the manager
-            m_webCamTextureManager.RequestedResolution = PassthroughCameraUtils.GetCameraIntrinsics(CameraEye).Resolution;
+            // Set the requested resolution only when left as (0,0) in the inspector.
+            if (m_webCamTextureManager.RequestedResolution == Vector2Int.zero)
+            {
+                m_webCamTextureManager.RequestedResolution = PassthroughCameraUtils.GetCameraIntrinsics(CameraEye).Resolution;
+            }
             m_webCamTextureManager.enabled = true;
 
             var cameraCanvasRectTransform = m_detectionCanvas.GetComponentInChildren<RectTransform>();

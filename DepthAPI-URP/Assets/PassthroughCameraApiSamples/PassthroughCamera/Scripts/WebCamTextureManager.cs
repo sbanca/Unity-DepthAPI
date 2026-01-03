@@ -93,11 +93,11 @@ namespace PassthroughCameraSamples
             }
 
             // ========== check Resolution ==========
-            // var supportedSizes = PassthroughCameraUtils.GetOutputSizes(Eye);
-            // foreach (var size in supportedSizes)
-            // {
-            //     Debug.Log($"Supported Passthrough Resolution: {size.x}x{size.y}");
-            // }
+            var supportedSizes = PassthroughCameraUtils.GetOutputSizes(Eye);
+            foreach (var size in supportedSizes)
+            {
+                Debug.Log($"Supported Passthrough Resolution: {size.x}x{size.y}");
+            }
             // =======================================
 
 #if !UNITY_6000_OR_NEWER
@@ -137,7 +137,7 @@ namespace PassthroughCameraSamples
                             PCD.DebugMessage(LogType.Warning, $"WebCamTexture created, but '{nameof(RequestedResolution)}' {RequestedResolution} is not supported. Current resolution: {currentResolution}.");
                         }
                         WebCamTexture = webCamTexture;
-                        PCD.DebugMessage(LogType.Log, $"WebCamTexture created, texturePtr: {WebCamTexture.GetNativeTexturePtr()}, size: {WebCamTexture.width}/{WebCamTexture.height}");
+                        PCD.DebugMessage(LogType.Log, $"WebCamTexture created, texturePtr: {WebCamTexture.GetNativeTexturePtr()}, size: {WebCamTexture.width}/{WebCamTexture.height}, requested: {RequestedResolution}, manager: {name}");
                         yield break;
                     }
                 }
