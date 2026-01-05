@@ -1231,8 +1231,6 @@ MonoBehaviour:
   metersRT: {fileID: 8400000, guid: e571fb1df9eb7124bb7e2d138f02938d, type: 2}
   outQuad: {fileID: 21477427}
   outQuadScale: 1
-  _saveSnapshotButton: 0
-  _hidUnhide: 0
 --- !u!114 &226138087
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12948,9 +12946,24 @@ PrefabInstance:
       objectReference: {fileID: 59405333}
     - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
+      propertyPath: m_maskMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: dbc820bdb68149f4ca2c145715cd7c88, type: 2}
+    - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
       propertyPath: m_debugRenderer
       value: 
       objectReference: {fileID: 1843940478}
+    - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      propertyPath: m_useBinaryMask
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      propertyPath: m_depthMaskSource
+      value: 
+      objectReference: {fileID: 226138086}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

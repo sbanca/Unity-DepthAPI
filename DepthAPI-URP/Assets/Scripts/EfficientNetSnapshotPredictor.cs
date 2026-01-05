@@ -20,6 +20,13 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     public float LastInferenceMs { get; private set; }
     public bool HasResult { get; private set; }
 
+    [Header("Mask")]
+    [SerializeField] private bool m_useBinaryMask;
+    [SerializeField] private DepthReprojectBaker m_depthMaskSource;
+    [SerializeField, Range(0f, 1f)] private float m_maskThreshold = 0.5f;
+    [SerializeField] private bool m_invertMask;
+    [SerializeField] private Material m_maskMaterial;
+
     [Header("Debug")]
     [SerializeField] private Renderer m_debugRenderer;
     [SerializeField] private RawImage m_debugRawImage;
@@ -27,6 +34,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     private bool m_isCapturing;
     private RenderTexture m_debugTexture;
     private MaterialPropertyBlock m_debugPropertyBlock;
+    private Material m_runtimeMaskMaterial;
 
     public void CaptureAndPredict()
     {
@@ -42,6 +50,9 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     {
         m_isCapturing = true;
         RenderTexture inputTexture = null;
+        RenderTexture maskTexture = null;
+        RenderTexture maskedInputTexture = null;
+        Texture2D maskTextureCpu = null;
 
         try
         {
@@ -112,9 +123,47 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
                 yield break;
             }
 
-            UpdateDebugTexture(inputTexture, targetSize);
+            var finalInputTexture = inputTexture;
+            if (m_useBinaryMask)
+            {
+                if (m_depthMaskSource == null)
+                {
+                    m_depthMaskSource = FindAnyObjectByType<DepthReprojectBaker>();
+                }
 
-            if (modelRunner.TryPredict(inputTexture, out var mean, out var logVar, out var inferenceMs))
+                if (m_depthMaskSource == null)
+                {
+                    Debug.LogWarning("EfficientNetSnapshotPredictor: DepthReprojectBaker is missing, skipping mask.");
+                }
+                else
+                {
+                    maskTextureCpu = m_depthMaskSource.BuildBinaryMaskFromGlobals(m_invertMask);
+                    if (maskTextureCpu == null)
+                    {
+                        Debug.LogWarning("EfficientNetSnapshotPredictor: Failed to build binary mask, skipping mask.");
+                    }
+                    else
+                    {
+                        maskTexture = CropAndResizeCenter(maskTextureCpu, targetSize.x, targetSize.y);
+                        if (maskTexture == null)
+                        {
+                            Debug.LogWarning("EfficientNetSnapshotPredictor: Failed to resize mask, skipping mask.");
+                        }
+                        else
+                        {
+                            maskedInputTexture = ApplyBinaryMask(inputTexture, maskTexture);
+                            if (maskedInputTexture != null)
+                            {
+                                finalInputTexture = maskedInputTexture;
+                            }
+                        }
+                    }
+                }
+            }
+
+            UpdateDebugTexture(finalInputTexture, targetSize);
+
+            if (modelRunner.TryPredict(finalInputTexture, out var mean, out var logVar, out var inferenceMs))
             {
                 LastMean = mean;
                 LastLogVariance = logVar;
@@ -130,6 +179,21 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
                 RenderTexture.ReleaseTemporary(inputTexture);
             }
 
+            if (maskTexture != null)
+            {
+                RenderTexture.ReleaseTemporary(maskTexture);
+            }
+
+            if (maskedInputTexture != null)
+            {
+                RenderTexture.ReleaseTemporary(maskedInputTexture);
+            }
+
+            if (maskTextureCpu != null)
+            {
+                Destroy(maskTextureCpu);
+            }
+
             m_isCapturing = false;
         }
     }
@@ -141,6 +205,12 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
             m_debugTexture.Release();
             Destroy(m_debugTexture);
             m_debugTexture = null;
+        }
+
+        if (m_runtimeMaskMaterial != null)
+        {
+            Destroy(m_runtimeMaskMaterial);
+            m_runtimeMaskMaterial = null;
         }
     }
 
@@ -177,6 +247,53 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
         var rt = RenderTexture.GetTemporary(targetWidth, targetHeight, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
         Graphics.Blit(source, rt, scale, offset);
         return rt;
+    }
+
+    private RenderTexture ApplyBinaryMask(RenderTexture source, RenderTexture mask)
+    {
+        if (source == null || mask == null)
+        {
+            return null;
+        }
+
+        var mat = GetMaskMaterial();
+        if (mat == null)
+        {
+            Debug.LogWarning("EfficientNetSnapshotPredictor: Missing mask material, skipping mask.");
+            return null;
+        }
+
+        mat.SetTexture("_MaskTex", mask);
+        mat.SetFloat("_Threshold", m_maskThreshold);
+
+        var rt = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+        Graphics.Blit(source, rt, mat);
+        return rt;
+    }
+
+    private Material GetMaskMaterial()
+    {
+        if (m_maskMaterial != null)
+        {
+            return m_maskMaterial;
+        }
+
+        if (m_runtimeMaskMaterial != null)
+        {
+            return m_runtimeMaskMaterial;
+        }
+
+        var shader = Shader.Find("Hidden/ApplyBinaryMask");
+        if (shader == null)
+        {
+            return null;
+        }
+
+        m_runtimeMaskMaterial = new Material(shader)
+        {
+            hideFlags = HideFlags.HideAndDontSave
+        };
+        return m_runtimeMaskMaterial;
     }
 
     private void UpdateDebugTexture(RenderTexture source, Vector2Int targetSize)

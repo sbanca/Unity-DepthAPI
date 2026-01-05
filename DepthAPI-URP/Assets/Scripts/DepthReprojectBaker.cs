@@ -97,6 +97,58 @@ public class DepthReprojectBaker : MonoBehaviour
         Debug.Log($"Saved EXR to: {exrPath}");
     }
 
+    public Texture2D BuildBinaryMask(float minMeters, float maxMeters, bool invert = false)
+    {
+        if (!metersRT || !metersRT.IsCreated())
+        {
+            Debug.LogWarning("BuildBinaryMask: metersRT not ready");
+            return null;
+        }
+
+        if (maxMeters <= minMeters)
+        {
+            Debug.LogWarning("BuildBinaryMask: maxMeters must be greater than minMeters");
+            return null;
+        }
+
+        var prev = RenderTexture.active;
+        RenderTexture.active = metersRT;
+
+        var src = new Texture2D(metersRT.width, metersRT.height, TextureFormat.RGBAFloat, false, true);
+        src.ReadPixels(new Rect(0, 0, metersRT.width, metersRT.height), 0, 0);
+        src.Apply();
+
+        RenderTexture.active = prev;
+
+        var srcPixels = src.GetPixels();
+        var maskPixels = new Color32[srcPixels.Length];
+        for (int i = 0; i < srcPixels.Length; i++)
+        {
+            float r = srcPixels[i].r;
+            bool inRange = r >= minMeters && r <= maxMeters;
+            byte v = inRange ? (byte)255 : (byte)0;
+            if (invert)
+            {
+                v = (byte)(255 - v);
+            }
+            maskPixels[i] = new Color32(v, v, v, 255);
+        }
+
+        var mask = new Texture2D(metersRT.width, metersRT.height, TextureFormat.RGBA32, false, true);
+        mask.SetPixels32(maskPixels);
+        mask.Apply();
+
+        Destroy(src);
+        return mask;
+    }
+
+    public Texture2D BuildBinaryMaskFromGlobals(bool invert = false)
+    {
+        float minMeters = Shader.GetGlobalFloat("_DepthMinMeters");
+        float maxMeters = Shader.GetGlobalFloat("_DepthMaxMeters");
+        return BuildBinaryMask(minMeters, maxMeters, invert);
+    }
+
     private void OnDisable()
     {
         if (metersRT)
