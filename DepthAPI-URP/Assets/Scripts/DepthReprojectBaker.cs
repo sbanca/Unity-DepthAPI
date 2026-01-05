@@ -15,17 +15,6 @@ public class DepthReprojectBaker : MonoBehaviour
     public Transform outQuad;               // assign in Inspector
     [Min(0f)] public float outQuadScale = 1f; // uniform multiplier for size
 
-    [Header("Controls")]
-    [SerializeField] private OVRInput.RawButton _saveSnapshotButton = OVRInput.RawButton.A;
-    [SerializeField] private OVRInput.RawButton _hidUnhide = OVRInput.RawButton.B;
-
-
-    private void Update()
-    {
-        if (OVRInput.GetDown(_saveSnapshotButton)) SaveEXR();
-        if (OVRInput.GetDown(_hidUnhide)) ToggleVisibility();
-    }
-
     public void ToggleVisibility()
     {
         if (!quad) { Debug.LogWarning("ToggleVisibility: quad is null"); return; }
