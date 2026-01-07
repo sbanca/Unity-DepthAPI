@@ -108,8 +108,21 @@ public class CameraToWorldManagerSimple : MonoBehaviour
     private void ScaleCameraCanvas()
     {
         var cameraCanvasRectTransform = m_cameraCanvas.GetComponentInChildren<RectTransform>();
-        var leftSidePointInCamera = PassthroughCameraUtils.ScreenPointToRayInCamera(CameraEye, new Vector2Int(0, CameraResolution.y / 2));
-        var rightSidePointInCamera = PassthroughCameraUtils.ScreenPointToRayInCamera(CameraEye, new Vector2Int(CameraResolution.x, CameraResolution.y / 2));
+        if (cameraCanvasRectTransform == null || cameraCanvasRectTransform.sizeDelta.x <= 0f)
+        {
+            return;
+        }
+
+        // ScreenPointToRayInCamera expects coordinates in the max camera resolution (intrinsics space),
+        // not the requested output size, otherwise the computed FOV shrinks at lower resolutions.
+        var intrinsicsResolution = PassthroughCameraUtils.GetCameraIntrinsics(CameraEye).Resolution;
+        if (intrinsicsResolution.x <= 0 || intrinsicsResolution.y <= 0)
+        {
+            intrinsicsResolution = CameraResolution;
+        }
+
+        var leftSidePointInCamera = PassthroughCameraUtils.ScreenPointToRayInCamera(CameraEye, new Vector2Int(0, intrinsicsResolution.y / 2));
+        var rightSidePointInCamera = PassthroughCameraUtils.ScreenPointToRayInCamera(CameraEye, new Vector2Int(intrinsicsResolution.x, intrinsicsResolution.y / 2));
         var horizontalFoVDegrees = Vector3.Angle(leftSidePointInCamera.direction, rightSidePointInCamera.direction);
         var horizontalFoVRadians = horizontalFoVDegrees * Mathf.Deg2Rad;
         var newCanvasWidthInMeters = 2 * m_canvasDistance * Mathf.Tan(horizontalFoVRadians / 2);
