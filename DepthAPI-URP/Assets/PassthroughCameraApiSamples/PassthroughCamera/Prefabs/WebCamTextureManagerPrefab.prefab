@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 766937029272742929}
   - component: {fileID: 3155958272935594558}
   - component: {fileID: 2840333169921410720}
+  - component: {fileID: 3368491840009432599}
   m_Layer: 0
   m_Name: WebCamTextureManagerPrefab
   m_TagString: Untagged
@@ -75,5 +76,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Eye: 0
-  RequestedResolution: {x: 1280, y: 960}
+  requestedResolutionPreset: 12
+  RequestedResolution: {x: 1280, y: 1280}
   CameraPermissions: {fileID: 766937029272742929}
+--- !u!114 &3368491840009432599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7847449403238870662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d618741081052bb4fba02dcc0e40b9bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_webCamTextureManager: {fileID: 2840333169921410720}
+  m_targets:
+  - Type: 0
+    Target: {fileID: 0}
+  - Type: 0
+    Target: {fileID: 0}
+  - Type: 2
+    Target: {fileID: 8400000, guid: e571fb1df9eb7124bb7e2d138f02938d, type: 2}
+  - Type: 2
+    Target: {fileID: 8400000, guid: 983a5895bc3f070438405b0d402d325c, type: 2}
