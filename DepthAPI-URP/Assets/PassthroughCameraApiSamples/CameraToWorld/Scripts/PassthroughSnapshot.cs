@@ -11,7 +11,6 @@
 
 using System.Collections;
 using System.IO;
-using Meta.XR;
 using PassthroughCameraSamples;
 using Unity.Collections;
 using UnityEngine;
@@ -21,9 +20,6 @@ public class PassthroughSnapshot : MonoBehaviour
     [Tooltip("Reference the WebCamTextureManager in your scene. " +
              "If left null, the script will try to find one at runtime.")]
     public WebCamTextureManager webcamManager;
-
-    [Tooltip("Optional PassthroughCameraAccess for CPU snapshots; if assigned, it is used instead of WebCamTexture.")]
-    public PassthroughCameraAccess cameraAccess;
 
     [Header("Input")]
     [SerializeField] private OVRInput.RawButton _saveSnapshotButton = OVRInput.RawButton.A;
@@ -46,62 +42,6 @@ public class PassthroughSnapshot : MonoBehaviour
     private IEnumerator CaptureFrameCoroutine()
     {
         _isCapturing = true;
-
-        if (cameraAccess == null)
-        {
-            cameraAccess = FindAnyObjectByType<PassthroughCameraAccess>();
-        }
-
-        if (cameraAccess != null && cameraAccess.IsPlaying)
-        {
-            const int maxWaitFramesAccess = 5;
-            var waitedFramesAccess = 0;
-            do
-            {
-                yield return new WaitForEndOfFrame();
-                waitedFramesAccess++;
-            } while (!cameraAccess.IsUpdatedThisFrame && waitedFramesAccess < maxWaitFramesAccess);
-
-            if (!cameraAccess.IsUpdatedThisFrame)
-            {
-                Debug.LogWarning("PassthroughSnapshot: PassthroughCameraAccess did not update this frame; capture may be stale.");
-            }
-
-            var size = cameraAccess.CurrentResolution;
-            if (size.x <= 0 || size.y <= 0)
-            {
-                Debug.LogWarning("PassthroughSnapshot: PassthroughCameraAccess resolution is not ready yet.");
-                _isCapturing = false;
-                yield break;
-            }
-
-            var pixels = cameraAccess.GetColors();
-            var pixelCount = size.x * size.y;
-            if (!pixels.IsCreated || pixels.Length < pixelCount)
-            {
-                Debug.LogWarning("PassthroughSnapshot: PassthroughCameraAccess pixel buffer is not ready yet.");
-                _isCapturing = false;
-                yield break;
-            }
-
-            var managedPixels = new Color32[pixelCount];
-            NativeArray<Color32>.Copy(pixels, managedPixels, pixelCount);
-
-            var accessTex = new Texture2D(size.x, size.y, TextureFormat.RGBA32, false);
-            accessTex.SetPixels32(managedPixels);
-            accessTex.Apply(false, false);
-
-            byte[] accessPng = accessTex.EncodeToPNG();
-            Destroy(accessTex);
-
-            string accessFilename = $"PassthroughSnapshot_{cameraAccess.CameraPosition}_{Time.frameCount}.png";
-            string accessFullPath = Path.Combine(Application.persistentDataPath, accessFilename);
-            File.WriteAllBytes(accessFullPath, accessPng);
-
-            Debug.Log($"PassthroughSnapshot: Saved to {accessFullPath} (PassthroughCameraAccess)");
-            _isCapturing = false;
-            yield break;
-        }
 
         if (webcamManager == null)
         {
