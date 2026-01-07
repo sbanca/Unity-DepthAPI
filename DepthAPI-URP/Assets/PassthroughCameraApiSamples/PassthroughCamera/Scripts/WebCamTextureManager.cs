@@ -13,8 +13,12 @@ namespace PassthroughCameraSamples
     public class WebCamTextureManager : MonoBehaviour
     {
         [SerializeField] public PassthroughCameraEye Eye = PassthroughCameraEye.Left;
+        [SerializeField, Tooltip("Resolution preset list derived from supported device outputs. " +
+                                 "Use Custom to keep RequestedResolution as-is, or Auto for max supported.")]
+        private PassthroughCameraResolutionPreset requestedResolutionPreset = PassthroughCameraResolutionPreset.Custom;
         [SerializeField, Tooltip("The requested resolution of the camera may not be supported by the chosen camera. In such cases, the closest available values will be used.\n\n" +
-                                 "When set to (0,0), the highest supported resolution will be used.")]
+                                 "When set to (0,0), the highest supported resolution will be used.\n\n" +
+                                 "If a preset is selected above, this value will be overridden.")]
         public Vector2Int RequestedResolution;
         [SerializeField] public PassthroughCameraPermissions CameraPermissions;
 
@@ -27,6 +31,7 @@ namespace PassthroughCameraSamples
 
         private void Awake()
         {
+            ApplyResolutionPreset();
             PCD.DebugMessage(LogType.Log, $"{nameof(WebCamTextureManager)}.{nameof(Awake)}() was called");
             Assert.AreEqual(1, FindObjectsByType<WebCamTextureManager>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length,
                 $"PCA: Passthrough Camera: more than one {nameof(WebCamTextureManager)} component. Only one instance is allowed at a time. Current instance: {name}");
@@ -56,6 +61,21 @@ namespace PassthroughCameraSamples
 
             PCD.DebugMessage(LogType.Log, "PCA: All permissions have been granted");
             _ = StartCoroutine(InitializeWebCamTexture());
+        }
+
+        private void OnValidate()
+        {
+            ApplyResolutionPreset();
+        }
+
+        private void ApplyResolutionPreset()
+        {
+            if (requestedResolutionPreset == PassthroughCameraResolutionPreset.Custom)
+            {
+                return;
+            }
+
+            RequestedResolution = requestedResolutionPreset.ToVector2Int();
         }
 
         private void OnDisable()
