@@ -312,6 +312,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   depthSamplingQuad: {fileID: 1957423516160592453}
   depthPreviewQuad: {fileID: 2179156988594755487}
+  canvasRect: {fileID: 0}
   quadDistance: 1
   zOffset: 0.001
   useHandCaptureGlobalsEyeIndex: 1

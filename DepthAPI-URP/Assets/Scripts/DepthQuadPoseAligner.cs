@@ -7,6 +7,7 @@ public class DepthQuadPoseAligner : MonoBehaviour
 {
     [SerializeField] private Transform depthSamplingQuad;
     [SerializeField] private Transform depthPreviewQuad;
+    [SerializeField] private RectTransform canvasRect;
     [SerializeField, Min(0f)] private float quadDistance = 1f;
     [SerializeField] private float zOffset = 0.001f;
     [SerializeField] private bool useHandCaptureGlobalsEyeIndex = true;
@@ -48,6 +49,11 @@ public class DepthQuadPoseAligner : MonoBehaviour
 
     private Vector2 GetQuadSize(PassthroughCameraEye cameraEye)
     {
+        if (TryGetCanvasWorldSize(out var canvasSize))
+        {
+            return canvasSize;
+        }
+
         if (quadDistance <= 0f)
         {
             return Vector2.zero;
@@ -65,5 +71,27 @@ public class DepthQuadPoseAligner : MonoBehaviour
         var width = 2f * quadDistance * Mathf.Tan(horizontalFov * 0.5f);
         var height = 2f * quadDistance * Mathf.Tan(verticalFov * 0.5f);
         return new Vector2(width, height);
+    }
+
+    private bool TryGetCanvasWorldSize(out Vector2 size)
+    {
+        size = Vector2.zero;
+        if (!canvasRect)
+        {
+            return false;
+        }
+
+        var corners = new Vector3[4];
+        canvasRect.GetWorldCorners(corners); // 0=BL,1=TL,2=TR,3=BR
+
+        var worldWidth = Vector3.Distance(corners[3], corners[0]);
+        var worldHeight = Vector3.Distance(corners[1], corners[0]);
+        if (worldWidth <= 0f || worldHeight <= 0f)
+        {
+            return false;
+        }
+
+        size = new Vector2(worldWidth, worldHeight);
+        return true;
     }
 }
