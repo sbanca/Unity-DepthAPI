@@ -104,6 +104,7 @@
   <Project Path="Unity.XR.ARFoundation.Editor.csproj" />
   <Project Path="Unity.EditorCoroutines.Editor.csproj" />
   <Project Path="Meta.XR.Guides.Editor.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Unity.XR.OpenXR.Features.MetaQuestSupport.csproj" />
   <Project Path="Meta.XR.ImmersiveDebugger.Interface.csproj" />
   <Project Path="Meta.XR.Editor.UPST.Notifications.csproj" />
@@ -114,7 +115,6 @@
   <Project Path="Unity.XR.OpenXR.Features.RuntimeDebugger.csproj" />
   <Project Path="UnityEngine.SpatialTracking.csproj" />
   <Project Path="Unity.XR.OpenXR.Features.OculusQuestSupport.Editor.csproj" />
-  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Oculus.Interaction.Editor.UnityXR.csproj" />
   <Project Path="UnityEngine.XR.LegacyInputHelpers.csproj" />
   <Project Path="Unity.XR.OpenXR.Features.RuntimeDebugger.Editor.csproj" />
