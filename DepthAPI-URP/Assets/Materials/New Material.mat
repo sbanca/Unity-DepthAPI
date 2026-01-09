@@ -99,13 +99,13 @@ Material:
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
     - _EyeIndex: 0
-    - _Far: 0.8
+    - _Far: 0.924
     - _FlipV: 0
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Metallic: 0
-    - _Near: 0.2
+    - _Near: 0.553
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueOffset: 0
