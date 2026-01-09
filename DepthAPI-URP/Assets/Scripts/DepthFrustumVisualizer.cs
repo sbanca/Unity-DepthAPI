@@ -16,6 +16,8 @@ public class DepthFrustumVisualizer : MonoBehaviour
     [SerializeField, Min(1f)] private float m_editorHFovDegrees = 90f;
     [SerializeField, Min(1f)] private float m_editorVFovDegrees = 60f;
     [SerializeField] private bool m_matchOutputAspect = true;
+    [SerializeField] private float m_minMetersOffset = 0f;
+    [SerializeField] private float m_maxMetersOffset = 0f;
 
     [Header("Output")]
     [SerializeField] private MeshFilter m_meshFilter;
@@ -221,6 +223,8 @@ public class DepthFrustumVisualizer : MonoBehaviour
 
         minMeters = m_settings.minMeters;
         maxMeters = m_settings.maxMeters;
+        minMeters += m_minMetersOffset;
+        maxMeters += m_maxMetersOffset;
         if (maxMeters < minMeters)
         {
             maxMeters = minMeters;

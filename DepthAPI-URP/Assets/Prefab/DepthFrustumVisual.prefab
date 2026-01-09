@@ -50,7 +50,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5472020360487293737}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -111,6 +111,8 @@ MonoBehaviour:
   m_editorHFovDegrees: 90
   m_editorVFovDegrees: 60
   m_matchOutputAspect: 1
+  m_minMetersOffset: -0.03
+  m_maxMetersOffset: 0.02
   m_meshFilter: {fileID: 5640378335103758668}
   m_meshRenderer: {fileID: 2905574250931921521}
 --- !u!114 &3323440576809358848

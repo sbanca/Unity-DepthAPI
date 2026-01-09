@@ -188,6 +188,171 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2c842b6fcbd2a3341bad56e168e2b13a, type: 3}
+--- !u!43 &551247188
+Mesh:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: DepthFrustumMesh
+  serializedVersion: 11
+  m_SubMeshes:
+  - serializedVersion: 2
+    firstByte: 0
+    indexCount: 36
+    topology: 0
+    baseVertex: 0
+    firstVertex: 0
+    vertexCount: 8
+    localAABB:
+      m_Center: {x: 0, y: 0, z: 0.22}
+      m_Extent: {x: 0.29, y: 0.2175, z: 0.06999999}
+  m_Shapes:
+    vertices: []
+    shapes: []
+    channels: []
+    fullWeights: []
+  m_BindPose: []
+  m_BoneNameHashes: 
+  m_RootBoneNameHash: 0
+  m_BonesAABB: []
+  m_VariableBoneCountWeights:
+    m_Data: 
+  m_MeshCompression: 0
+  m_IsReadable: 1
+  m_KeepVertices: 1
+  m_KeepIndices: 1
+  m_IndexFormat: 0
+  m_IndexBuffer: 000001000200000002000300040006000500040007000600000003000700000007000400010005000600010006000200000004000500000005000100030002000600030006000700
+  m_VertexData:
+    serializedVersion: 3
+    m_VertexCount: 8
+    m_Channels:
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 12
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    m_DataSize: 192
+    _typelessdata: 9a9919be6766e63d9a99193ea44885be2fb6b13e71a666bf9a99193e6766e63d9a99193e5c5eda3e5384463ee02a62bf9a99193e6766e6bd9a99193eba771d3ef8f451be027377bf9a9919be6766e6bd9a99193ecb5e0cbe3e4009bfac3a55bfe17a94be52b85e3ee17a943ebb771dbef9f4513e0273773fe17a943e52b85e3ee17a943ec017b83e72353a3fcfa1153fe17a943e52b85ebee17a943ea548853e31b6b1be71a6663fe17a94be52b85ebee17a943e8cce15bfffa503bfe181203f
+  m_CompressedMesh:
+    m_Vertices:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UV:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Normals:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Tangents:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Weights:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_NormalSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_TangentSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_FloatColors:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_BoneIndices:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Triangles:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UVInfo: 0
+  m_LocalAABB:
+    m_Center: {x: 0, y: 0, z: 0.22}
+    m_Extent: {x: 0.29, y: 0.2175, z: 0.06999999}
+  m_MeshUsageFlags: 0
+  m_CookingOptions: 30
+  m_BakedConvexCollisionMesh: 
+  m_BakedTriangleCollisionMesh: 
+  'm_MeshMetrics[0]': 1
+  'm_MeshMetrics[1]': 1
+  m_MeshOptimizationFlags: 1
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
 --- !u!114 &855815145 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2512341414945897862, guid: 2c842b6fcbd2a3341bad56e168e2b13a,
@@ -597,7 +762,7 @@ SkinnedMeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2055017649}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -653,7 +818,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2055017649}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 73eac66b128fc8749a21623225c34541, type: 3}
   m_Name: 
@@ -792,7 +957,7 @@ SkinnedMeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2092199520}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -848,7 +1013,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2092199520}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 73eac66b128fc8749a21623225c34541, type: 3}
   m_Name: 
@@ -953,17 +1118,17 @@ PrefabInstance:
     - target: {fileID: 325187738688413503, guid: 2d3e9d26494f08946932212acbbbf8e2,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.0009999871
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 325187738688413503, guid: 2d3e9d26494f08946932212acbbbf8e2,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.003999993
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 325187738688413503, guid: 2d3e9d26494f08946932212acbbbf8e2,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.384
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 325187738688413503, guid: 2d3e9d26494f08946932212acbbbf8e2,
         type: 3}
@@ -973,17 +1138,17 @@ PrefabInstance:
     - target: {fileID: 325187738688413503, guid: 2d3e9d26494f08946932212acbbbf8e2,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 325187738688413503, guid: 2d3e9d26494f08946932212acbbbf8e2,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 325187738688413503, guid: 2d3e9d26494f08946932212acbbbf8e2,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 325187738688413503, guid: 2d3e9d26494f08946932212acbbbf8e2,
         type: 3}
@@ -1020,6 +1185,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: DepthFrustumVisual
       objectReference: {fileID: 0}
+    - target: {fileID: 5640378335103758668, guid: 2d3e9d26494f08946932212acbbbf8e2,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 551247188}
     - target: {fileID: 8997562840958348349, guid: 2d3e9d26494f08946932212acbbbf8e2,
         type: 3}
       propertyPath: m_webCamTextureManager
