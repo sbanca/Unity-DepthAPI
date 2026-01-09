@@ -212,15 +212,25 @@ PrefabInstance:
     - {fileID: 6580444947681234737, guid: 2c842b6fcbd2a3341bad56e168e2b13a, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3383354631363717984, guid: 2c842b6fcbd2a3341bad56e168e2b13a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 855815151}
   m_SourcePrefab: {fileID: 100100000, guid: 2c842b6fcbd2a3341bad56e168e2b13a, type: 3}
+--- !u!1 &247833870 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3383354631363717984, guid: 2c842b6fcbd2a3341bad56e168e2b13a,
+    type: 3}
+  m_PrefabInstance: {fileID: 247833869}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &855815145 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2512341414945897862, guid: 2c842b6fcbd2a3341bad56e168e2b13a,
     type: 3}
   m_PrefabInstance: {fileID: 247833869}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 247833870}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1afe0e470ba527d4f9d94cfda0f9fa87, type: 3}
@@ -232,12 +242,26 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 247833869}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 247833870}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a90cadb8592f20440843d07a678ea108, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &855815151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 247833870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ed03af043901948a99b7716c654317, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_webCamTextureManager: {fileID: 855815145}
+  m_applyOnEnable: 1
 --- !u!1 &999457077 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3537550991929160564, guid: 2c842b6fcbd2a3341bad56e168e2b13a,

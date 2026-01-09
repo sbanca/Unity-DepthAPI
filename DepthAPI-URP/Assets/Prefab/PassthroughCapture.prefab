@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1280, y: 1280}
+  m_SizeDelta: {x: 1280, y: 960}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2393935401210458553
 CanvasRenderer:
@@ -85,8 +85,8 @@ GameObject:
   - component: {fileID: 4117486499888814492}
   - component: {fileID: 2512341414945897862}
   - component: {fileID: 2550180490682939500}
-  - component: {fileID: 6580444947681234737}
   - component: {fileID: 4160620023880184832}
+  - component: {fileID: 2022808022431379168}
   m_Layer: 0
   m_Name: PassthroughCapture
   m_TagString: Untagged
@@ -151,8 +151,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Eye: 0
-  requestedResolutionPreset: 12
-  RequestedResolution: {x: 1280, y: 1280}
+  requestedResolutionPreset: 10
+  RequestedResolution: {x: 1280, y: 960}
   CameraPermissions: {fileID: 8190429594016736620}
 --- !u!114 &2550180490682939500
 MonoBehaviour:
@@ -176,21 +176,6 @@ MonoBehaviour:
     Target: {fileID: 8400000, guid: e571fb1df9eb7124bb7e2d138f02938d, type: 2}
   - Type: 2
     Target: {fileID: 8400000, guid: 983a5895bc3f070438405b0d402d325c, type: 2}
---- !u!114 &6580444947681234737
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3383354631363717984}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f365fadf2d468e418cdc318c76fb117, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_webCamTextureManager: {fileID: 2512341414945897862}
-  m_cameraCanvas: {fileID: 5335258316432526293}
-  m_canvasDistance: 1
 --- !u!114 &4160620023880184832
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -206,6 +191,22 @@ MonoBehaviour:
   m_webCamTextureManager: {fileID: 2512341414945897862}
   m_cameraCanvas: {fileID: 5335258316432526293}
   m_canvasDistance: 1
+  m_alignPose: 1
+  m_applyScaleOnStart: 1
+--- !u!114 &2022808022431379168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3383354631363717984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ed03af043901948a99b7716c654317, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_webCamTextureManager: {fileID: 2512341414945897862}
+  m_applyOnEnable: 1
 --- !u!1 &3537550991929160564
 GameObject:
   m_ObjectHideFlags: 0
@@ -225,7 +226,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2351016805159979569
 RectTransform:
   m_ObjectHideFlags: 0
@@ -244,7 +245,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1280, y: 1280}
+  m_SizeDelta: {x: 1280, y: 960}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &8227525342818748567
 Canvas:
