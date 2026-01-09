@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 2905574250931921521}
   - component: {fileID: 8997562840958348349}
   - component: {fileID: 3323440576809358848}
+  - component: {fileID: 3892685930422155651}
+  - component: {fileID: 8065127794068433492}
   m_Layer: 0
   m_Name: DepthFrustumVisual
   m_TagString: Untagged
@@ -133,6 +135,45 @@ MonoBehaviour:
   m_rightHand: {fileID: 0}
   m_requireDataValid: 1
   m_requireHighConfidence: 0
+  m_statusText: {fileID: 0}
+  m_leftLabel: Left
+  m_rightLabel: Right
+--- !u!114 &3892685930422155651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5472020360487293737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 425fc532010167b4a9c72a7c3524683e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_leftHand: {fileID: 0}
+  m_rightHand: {fileID: 0}
+  m_flatnessThreshold: 0.01
+  m_statusText: {fileID: 0}
+  m_leftLabel: Left
+  m_rightLabel: Right
+--- !u!114 &8065127794068433492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5472020360487293737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f4831bccc86e094ca1f56316216915b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_leftHand: {fileID: 0}
+  m_rightHand: {fileID: 0}
+  m_camera: {fileID: 0}
+  m_flipLeftNormal: 0
+  m_flipRightNormal: 0
+  m_facingDotThreshold: 0
   m_statusText: {fileID: 0}
   m_leftLabel: Left
   m_rightLabel: Right
