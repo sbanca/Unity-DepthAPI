@@ -5,6 +5,7 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
         _UseStereo ("Use Stereo", Float) = 1
         _EyeIndex ("Eye Index", Range(0, 1)) = 0
         _FlipV ("Flip V", Float) = 0
+        _RadiusUV ("Circle Radius (UV)", Range(0, 0.75)) = 0.5
     }
     SubShader
     {
@@ -30,6 +31,7 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
             float _UseStereo;
             float _EyeIndex;
             float _FlipV;
+            float _RadiusUV;
 
             struct appdata
             {
@@ -75,6 +77,15 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
 
                 float2 duv = clip.xy / clip.w * 0.5 + 0.5;
                 if (duv.x < 0 || duv.x > 1 || duv.y < 0 || duv.y > 1) return float4(0.0, 0.0, 0.0, 1.0);
+
+                float4 clipCenter = mul(_EnvironmentDepthReprojectionMatrices[eye], float4(_PlaneCenterWS, 1.0));
+                if (clipCenter.w <= 0) return float4(0.0, 0.0, 0.0, 1.0);
+                float2 centerDuv = clipCenter.xy / clipCenter.w * 0.5 + 0.5;
+                float2 centered = duv - centerDuv;
+                if (length(centered) > _RadiusUV)
+                {
+                    return float4(0.0, 0.0, 0.0, 0.0);
+                }
 
                 float d = UNITY_SAMPLE_TEX2DARRAY(_EnvironmentDepthTexture, float3(duv, eye)).r;
 
