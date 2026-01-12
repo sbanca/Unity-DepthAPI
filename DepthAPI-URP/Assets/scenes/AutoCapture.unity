@@ -11115,6 +11115,41 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2179156988594755487, guid: d6c279bd47094624c9431f5d4e7726b7,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.001
+      objectReference: {fileID: 0}
+    - target: {fileID: 2179156988594755487, guid: d6c279bd47094624c9431f5d4e7726b7,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.004
+      objectReference: {fileID: 0}
+    - target: {fileID: 2179156988594755487, guid: d6c279bd47094624c9431f5d4e7726b7,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.384
+      objectReference: {fileID: 0}
+    - target: {fileID: 2179156988594755487, guid: d6c279bd47094624c9431f5d4e7726b7,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2179156988594755487, guid: d6c279bd47094624c9431f5d4e7726b7,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2179156988594755487, guid: d6c279bd47094624c9431f5d4e7726b7,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2179156988594755487, guid: d6c279bd47094624c9431f5d4e7726b7,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
     - target: {fileID: 3332552127282862170, guid: d6c279bd47094624c9431f5d4e7726b7,
         type: 3}
       propertyPath: camMgr
@@ -11488,10 +11523,10 @@ MonoBehaviour:
   m_scoreSource: {fileID: 2115843716}
   m_useHandFromScore: 1
   m_hand: 0
-  m_leftBadgeTexture: {fileID: 2800000, guid: 78ee0639ccbfb74439b0392ecff5ee0f, type: 3}
-  m_rightBadgeTexture: {fileID: 2800000, guid: 88d9a99460f953b41baa2e91bb18ef95, type: 3}
-  m_leftBadgeRotation: 35
-  m_rightBadgeRotation: -35
+  m_leftBadgeTexture: {fileID: 2800000, guid: dd3c8a8f9ad018648ac0037115354ed5, type: 3}
+  m_rightBadgeTexture: {fileID: 2800000, guid: 0c4310b14dda7a7499cfcf509577cb68, type: 3}
+  m_leftBadgeRotation: 0
+  m_rightBadgeRotation: 0
   m_badgeTextureProperty: _BadgeTex
   m_badgeRotationProperty: _BadgeRotation
   m_targetRenderer: {fileID: 8392108279616622386}
