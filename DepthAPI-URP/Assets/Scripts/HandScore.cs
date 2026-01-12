@@ -20,45 +20,11 @@ public class HandScore : MonoBehaviour
     [SerializeField, Min(0f)] private float m_flatnessFalloff = 0.01f;
     [SerializeField, Min(0f)] private float m_facingFalloff = 0.02f;
 
-    [Header("Output")]
-    [SerializeField] private Renderer m_targetRenderer;
-    [SerializeField] private Material m_targetMaterial;
-    [SerializeField] private bool m_usePropertyBlock = true;
-    [SerializeField] private string m_scoreProperty = "_Score";
-
     public float Score { get; private set; }
-
-    private MaterialPropertyBlock m_block;
-    private int m_scoreId;
-
-    private void Awake()
-    {
-        CacheScoreId();
-        if (m_usePropertyBlock && m_block == null)
-        {
-            m_block = new MaterialPropertyBlock();
-        }
-    }
-
-    private void OnValidate()
-    {
-        CacheScoreId();
-    }
 
     private void Update()
     {
         Score = ComputeScore();
-        ApplyScore(Score);
-    }
-
-    private void CacheScoreId()
-    {
-        if (string.IsNullOrEmpty(m_scoreProperty))
-        {
-            m_scoreProperty = "_Score";
-        }
-
-        m_scoreId = Shader.PropertyToID(m_scoreProperty);
     }
 
     private float ComputeScore()
@@ -134,35 +100,4 @@ public class HandScore : MonoBehaviour
         return Mathf.Clamp01(score);
     }
 
-    private void ApplyScore(float score)
-    {
-        if (m_targetRenderer != null)
-        {
-            if (m_usePropertyBlock)
-            {
-                if (m_block == null)
-                {
-                    m_block = new MaterialPropertyBlock();
-                }
-
-                m_targetRenderer.GetPropertyBlock(m_block);
-                m_block.SetFloat(m_scoreId, score);
-                m_targetRenderer.SetPropertyBlock(m_block);
-            }
-            else if (m_targetRenderer.sharedMaterial != null)
-            {
-                m_targetRenderer.sharedMaterial.SetFloat(m_scoreId, score);
-            }
-
-            return;
-        }
-
-        if (m_targetMaterial != null)
-        {
-            m_targetMaterial.SetFloat(m_scoreId, score);
-            return;
-        }
-
-        Shader.SetGlobalFloat(m_scoreId, score);
-    }
 }
