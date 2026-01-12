@@ -111,8 +111,9 @@ Material:
     - _QueueOffset: 0
     - _Radius: 0.177
     - _RadiusMeters: 0.4
-    - _RadiusUV: 0.2
+    - _RadiusUV: 0.18
     - _ReceiveShadows: 1
+    - _Score: 0.5
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
