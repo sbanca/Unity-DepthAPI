@@ -552,6 +552,97 @@ MonoBehaviour:
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
   m_ScrollDeltaPerTick: 6
+--- !u!1001 &1880519256
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 611672361318899691, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 611672361318899691, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 611672361318899691, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 611672361318899691, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 611672361318899691, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 611672361318899691, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 611672361318899691, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 611672361318899691, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 611672361318899691, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 611672361318899691, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8773777662279500572, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_Name
+      value: UI_Debug
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879574086578560077, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_Sources.Array.data[0].sourceTransform
+      value: 
+      objectReference: {fileID: 8857403614600331116}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 526b204903722da42ab75a5734c3d027, type: 3}
+--- !u!114 &1880519257 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6365893004034624470, guid: 526b204903722da42ab75a5734c3d027,
+    type: 3}
+  m_PrefabInstance: {fileID: 1880519256}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!23 &1880519258 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 798241829223600346, guid: 526b204903722da42ab75a5734c3d027,
+    type: 3}
+  m_PrefabInstance: {fileID: 1880519256}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &21013509223063066
 Transform:
   m_ObjectHideFlags: 0
@@ -8229,12 +8320,12 @@ PrefabInstance:
         type: 3}
       propertyPath: m_resultText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1880519257}
     - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
       propertyPath: webcamManager
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 855815145}
     - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
       propertyPath: m_maskMaterial
@@ -8244,7 +8335,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_debugRenderer
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1880519258}
     - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
       propertyPath: m_useBinaryMask
@@ -11671,3 +11762,4 @@ SceneRoots:
   - {fileID: 8206751291613708359}
   - {fileID: 6450325907155778065}
   - {fileID: 6886293773963461330}
+  - {fileID: 1880519256}
