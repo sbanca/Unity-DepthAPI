@@ -9050,6 +9050,7 @@ MonoBehaviour:
   m_delayMs: 200
   m_predictionTimeoutMs: 10000
   m_disableAfterBatch: 1
+  m_batchText: {fileID: 1885682313}
 --- !u!1 &6463636499917572107
 GameObject:
   m_ObjectHideFlags: 0

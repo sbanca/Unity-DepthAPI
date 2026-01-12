@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public sealed class InferenceManager : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public sealed class InferenceManager : MonoBehaviour
     [SerializeField, Min(0f)] private float m_delayMs = 200f;
     [SerializeField, Min(0f)] private float m_predictionTimeoutMs = 2000f;
     [SerializeField] private bool m_disableAfterBatch = true;
+
+    [Header("Output")]
+    [SerializeField] private Text m_batchText;
 
     private bool m_isCollecting;
     private bool m_armed = true;
@@ -65,6 +69,8 @@ public sealed class InferenceManager : MonoBehaviour
         m_collector.Complete();
         m_isCollecting = false;
 
+        UpdateBatchText();
+
         if (m_disableAfterBatch)
         {
             enabled = false;
@@ -97,5 +103,32 @@ public sealed class InferenceManager : MonoBehaviour
         {
             m_collector.AddSample(m_predictor.LastMean, m_predictor.LastLogVariance, m_predictor.LastInferenceMs);
         }
+    }
+
+    private void UpdateBatchText()
+    {
+        if (m_batchText == null || m_collector == null)
+        {
+            return;
+        }
+
+        var count = m_collector.Count;
+        if (count <= 0)
+        {
+            m_batchText.text = "Batch: No samples";
+            return;
+        }
+
+        var mean = m_collector.AverageMean;
+        var logVar = m_collector.AverageLogVariance;
+        var stdDev = m_collector.AverageStdDev;
+        var inferMs = m_collector.AverageInferenceMs;
+
+        m_batchText.text =
+            $"Batch: {count}\n" +
+            $"Mean: {mean:0.###}\n" +
+            $"LogVar: {logVar:0.###}\n" +
+            $"StdDev: {stdDev:0.###}\n" +
+            $"Inference: {inferMs:0.##} ms";
     }
 }

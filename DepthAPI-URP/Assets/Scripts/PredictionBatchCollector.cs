@@ -65,6 +65,8 @@ public sealed class PredictionBatchCollector : MonoBehaviour
     public float AverageMean => GetAverage(m_samples, s => s.Mean);
     public float AverageLogVariance => GetAverage(m_samples, s => s.LogVariance);
     public float AverageInferenceMs => GetAverage(m_samples, s => s.InferenceMs);
+    public float AverageVariance => GetAverage(m_samples, s => Mathf.Exp(s.LogVariance));
+    public float AverageStdDev => Mathf.Sqrt(Mathf.Max(0f, AverageVariance));
 
     private static float GetAverage(IReadOnlyList<PredictionSample> samples, System.Func<PredictionSample, float> selector)
     {
