@@ -70,6 +70,7 @@
   <Project Path="Meta.XR.ImmersiveDebugger.Editor.csproj" />
   <Project Path="Unity.XR.CoreUtils.Editor.csproj" />
   <Project Path="Unity.AI.Navigation.Editor.csproj" />
+  <Project Path="Unity.2D.Sprite.Editor.csproj" />
   <Project Path="Unity.XR.OpenXR.Editor.csproj" />
   <Project Path="Oculus.Interaction.UnityXR.csproj" />
   <Project Path="Unity.Multiplayer.Center.Common.csproj" />

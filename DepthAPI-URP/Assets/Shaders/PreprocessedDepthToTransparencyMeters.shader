@@ -7,6 +7,11 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
         _FlipV ("Flip V", Float) = 0
         _RadiusUV ("Circle Radius (UV)", Range(0, 0.75)) = 0.5
         _Score ("Score", Range(0, 1)) = 0.5
+        _BadgeTex ("Badge Texture", 2D) = "white" {}
+        _BadgeColor ("Badge Color", Color) = (1, 1, 1, 1)
+        _BadgeSize ("Badge Size (UV)", Vector) = (0.2, 0.2, 0, 0)
+        _BadgeHideScore ("Badge Hide Score", Range(0, 1)) = 0.1
+        _BadgeRotation ("Badge Rotation (deg)", Range(-180, 180)) = 0
     }
     SubShader
     {
@@ -27,6 +32,7 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
             #include "Assets/Shaders/Includes/PlaneGlobals.hlsl"
 
             UNITY_DECLARE_TEX2DARRAY(_EnvironmentDepthTexture);
+            sampler2D _BadgeTex;
             float4x4 _EnvironmentDepthReprojectionMatrices[2];
             float4 _EnvironmentDepthZBufferParams;
             float _UseStereo;
@@ -34,6 +40,10 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
             float _FlipV;
             float _RadiusUV;
             float _Score;
+            float4 _BadgeColor;
+            float4 _BadgeSize;
+            float _BadgeHideScore;
+            float _BadgeRotation;
 
             struct appdata
             {
@@ -80,6 +90,32 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
                 return lerp(c2, c3, t);
             }
 
+            float4 SampleBadge(float2 uv)
+            {
+                float2 size = max(_BadgeSize.xy, float2(1e-6, 1e-6));
+                float2 halfSize = size * 0.5;
+                float2 delta = uv - float2(0.5, 0.5);
+                float width = length(_PlaneRightHalfWS) * 2.0;
+                float height = length(_PlaneUpHalfWS) * 2.0;
+                float aspect = height > 1e-6 ? (width / height) : 1.0;
+                delta.x *= aspect;
+
+                float rad = radians(_BadgeRotation);
+                float s = sin(rad);
+                float c = cos(rad);
+                float2 rotated = float2(c * delta.x - s * delta.y, s * delta.x + c * delta.y);
+                if (abs(rotated.x) > halfSize.x || abs(rotated.y) > halfSize.y)
+                {
+                    return float4(0.0, 0.0, 0.0, 0.0);
+                }
+
+                float2 badgeUV = rotated / size + 0.5;
+                float4 badge = tex2D(_BadgeTex, badgeUV);
+                badge.rgb *= _BadgeColor.rgb;
+                badge.a *= _BadgeColor.a;
+                return badge;
+            }
+
             fixed4 frag (v2f i) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
@@ -118,6 +154,19 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
                 bool inRange = (meters >= _DepthMinMeters) && (meters <= _DepthMaxMeters);
                 float alpha = inRange ? 0.0 : 1.0;
                 float3 color = RampColor(saturate(_Score));
+
+                float4 badge = float4(0.0, 0.0, 0.0, 0.0);
+                if (_Score < _BadgeHideScore)
+                {
+                    badge = SampleBadge(uv);
+                }
+
+                if (badge.a > 0.0)
+                {
+                    float outAlpha = badge.a + alpha * (1.0 - badge.a);
+                    float3 outColor = (badge.rgb * badge.a + color * alpha * (1.0 - badge.a)) / max(outAlpha, 1e-6);
+                    return float4(outColor, outAlpha);
+                }
 
                 return float4(color, alpha);
             }

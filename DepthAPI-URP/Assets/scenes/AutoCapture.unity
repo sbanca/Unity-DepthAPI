@@ -11486,6 +11486,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_scoreSource: {fileID: 2115843716}
+  m_useHandFromScore: 1
+  m_hand: 0
+  m_leftBadgeTexture: {fileID: 2800000, guid: 78ee0639ccbfb74439b0392ecff5ee0f, type: 3}
+  m_rightBadgeTexture: {fileID: 2800000, guid: 88d9a99460f953b41baa2e91bb18ef95, type: 3}
+  m_leftBadgeRotation: 35
+  m_rightBadgeRotation: -35
+  m_badgeTextureProperty: _BadgeTex
+  m_badgeRotationProperty: _BadgeRotation
   m_targetRenderer: {fileID: 8392108279616622386}
   m_targetMaterial: {fileID: 2100000, guid: 2284f3c7d5714e8498f115620b0b899f, type: 2}
   m_usePropertyBlock: 1

@@ -21,6 +21,7 @@ public class HandScore : MonoBehaviour
     [SerializeField, Min(0f)] private float m_facingFalloff = 0.02f;
 
     public float Score { get; private set; }
+    public HandSelection SelectedHand => m_hand;
 
     private void Update()
     {
