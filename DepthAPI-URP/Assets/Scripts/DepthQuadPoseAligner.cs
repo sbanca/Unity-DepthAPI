@@ -2,13 +2,16 @@
 
 using PassthroughCameraSamples;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class DepthQuadPoseAligner : MonoBehaviour
 {
     [SerializeField] private Transform depthSamplingQuad;
     [SerializeField] private Transform depthPreviewQuad;
     [SerializeField] private RectTransform canvasRect;
-    [SerializeField, Min(0f)] private float quadDistance = 1f;
+    [SerializeField, Min(0f), FormerlySerializedAs("quadDistance")] private float samplingQuadDistance = 1f;
+    [SerializeField, Min(0f)] private float previewQuadDistance = 1f;
+    [SerializeField, HideInInspector] private bool previewDistanceInitialized = false;
     [SerializeField] private float zOffset = 0.001f;
     [SerializeField] private bool useHandCaptureGlobalsEyeIndex = true;
     [SerializeField] private PassthroughCameraEye eye = PassthroughCameraEye.Left;
@@ -18,12 +21,14 @@ public class DepthQuadPoseAligner : MonoBehaviour
     {
         var cameraEye = ResolveEye();
         var cameraPose = PassthroughCameraUtils.GetCameraPoseInWorld(cameraEye);
-        var basePosition = cameraPose.position + cameraPose.rotation * Vector3.forward * quadDistance;
         var rotation = cameraPose.rotation;
-        var quadSize = scaleQuadsToCamera ? GetQuadSize(cameraEye) : Vector2.zero;
+        var samplingBasePosition = cameraPose.position + rotation * Vector3.forward * samplingQuadDistance;
+        var previewBasePosition = cameraPose.position + rotation * Vector3.forward * previewQuadDistance;
+        var samplingQuadSize = scaleQuadsToCamera ? GetQuadSize(cameraEye, samplingQuadDistance) : Vector2.zero;
+        var previewQuadSize = scaleQuadsToCamera ? GetQuadSize(cameraEye, previewQuadDistance) : Vector2.zero;
 
-        UpdateDepthQuadTransform(depthSamplingQuad, basePosition, rotation, quadSize);
-        UpdateDepthQuadTransform(depthPreviewQuad, basePosition, rotation, quadSize);
+        UpdateDepthQuadTransform(depthSamplingQuad, samplingBasePosition, rotation, samplingQuadSize);
+        UpdateDepthQuadTransform(depthPreviewQuad, previewBasePosition, rotation, previewQuadSize);
     }
 
     private void UpdateDepthQuadTransform(Transform quad, Vector3 basePosition, Quaternion rotation, Vector2 quadSize)
@@ -47,14 +52,14 @@ public class DepthQuadPoseAligner : MonoBehaviour
         return HandCaptureGlobals.EyeIndex == 0 ? PassthroughCameraEye.Left : PassthroughCameraEye.Right;
     }
 
-    private Vector2 GetQuadSize(PassthroughCameraEye cameraEye)
+    private Vector2 GetQuadSize(PassthroughCameraEye cameraEye, float distance)
     {
         if (TryGetCanvasWorldSize(out var canvasSize))
         {
             return canvasSize;
         }
 
-        if (quadDistance <= 0f)
+        if (distance <= 0f)
         {
             return Vector2.zero;
         }
@@ -68,9 +73,18 @@ public class DepthQuadPoseAligner : MonoBehaviour
 
         var horizontalFov = 2f * Mathf.Atan(intrinsics.Resolution.x / (2f * intrinsics.FocalLength.x));
         var verticalFov = 2f * Mathf.Atan(intrinsics.Resolution.y / (2f * intrinsics.FocalLength.y));
-        var width = 2f * quadDistance * Mathf.Tan(horizontalFov * 0.5f);
-        var height = 2f * quadDistance * Mathf.Tan(verticalFov * 0.5f);
+        var width = 2f * distance * Mathf.Tan(horizontalFov * 0.5f);
+        var height = 2f * distance * Mathf.Tan(verticalFov * 0.5f);
         return new Vector2(width, height);
+    }
+
+    private void OnValidate()
+    {
+        if (!previewDistanceInitialized)
+        {
+            previewQuadDistance = samplingQuadDistance;
+            previewDistanceInitialized = true;
+        }
     }
 
     private bool TryGetCanvasWorldSize(out Vector2 size)
