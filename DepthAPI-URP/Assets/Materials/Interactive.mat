@@ -91,10 +91,11 @@ Material:
     - _AlphaPower: 20
     - _AlphaToMask: 0
     - _BadgeHideScore: 0.1
-    - _BadgeRotation: -35
+    - _BadgeRotation: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
+    - _CircleAspect: 0.87
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2

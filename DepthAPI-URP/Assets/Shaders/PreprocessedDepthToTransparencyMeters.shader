@@ -12,6 +12,7 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
         _BadgeSize ("Badge Size (UV)", Vector) = (0.2, 0.2, 0, 0)
         _BadgeHideScore ("Badge Hide Score", Range(0, 1)) = 0.1
         _BadgeRotation ("Badge Rotation (deg)", Range(-180, 180)) = 0
+        _CircleAspect ("Circle Aspect", Range(0.1, 5)) = 1
     }
     SubShader
     {
@@ -40,6 +41,7 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
             float _FlipV;
             float _RadiusUV;
             float _Score;
+            float _CircleAspect;
             float4 _BadgeColor;
             float4 _BadgeSize;
             float _BadgeHideScore;
@@ -141,6 +143,7 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
                 if (clipCenter.w <= 0) return float4(0.0, 0.0, 0.0, 1.0);
                 float2 centerDuv = clipCenter.xy / clipCenter.w * 0.5 + 0.5;
                 float2 centered = duv - centerDuv;
+                centered.x *= _CircleAspect;
                 if (length(centered) > _RadiusUV)
                 {
                     return float4(0.0, 0.0, 0.0, 0.0);
