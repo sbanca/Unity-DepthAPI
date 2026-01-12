@@ -497,6 +497,12 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &1373883862 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3657254597569055560, guid: 2f320d8b4cfb476419a780ce145435aa,
+    type: 3}
+  m_PrefabInstance: {fileID: 6450325907155778065}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1501878330
 GameObject:
   m_ObjectHideFlags: 0
@@ -1281,6 +1287,7 @@ MonoBehaviour:
   m_hand: 0
   m_flatnessFalloff: 0.01
   m_facingFalloff: 0.02
+  m_scoreText: {fileID: 0}
 --- !u!4 &21013509223063066
 Transform:
   m_ObjectHideFlags: 0
@@ -8988,7 +8995,15 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3657254597569055560, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6450325907155778070}
+    - targetCorrespondingSourceObject: {fileID: 3657254597569055560, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6450325907155778069}
   m_SourcePrefab: {fileID: 100100000, guid: 2f320d8b4cfb476419a780ce145435aa, type: 3}
 --- !u!114 &6450325907155778066 stripped
 MonoBehaviour:
@@ -8996,12 +9011,45 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 6450325907155778065}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1373883862}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 49ecb589fb1b48d19341324d51195a0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6450325907155778069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373883862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0664bc90c013a214e9bed324c0298cc3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6450325907155778070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373883862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e96acb7663128d44b74edd4299ebf77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_handScore: {fileID: 2115843716}
+  m_predictor: {fileID: 6450325907155778066}
+  m_collector: {fileID: 6450325907155778069}
+  m_scoreThreshold: 0.93
+  m_requireScoreDropToRetrigger: 0
+  m_predictionsPerBatch: 4
+  m_delayMs: 200
+  m_predictionTimeoutMs: 10000
+  m_disableAfterBatch: 1
 --- !u!1 &6463636499917572107
 GameObject:
   m_ObjectHideFlags: 0

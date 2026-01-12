@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class HandScore : MonoBehaviour
 {
@@ -20,12 +21,16 @@ public class HandScore : MonoBehaviour
     [SerializeField, Min(0f)] private float m_flatnessFalloff = 0.01f;
     [SerializeField, Min(0f)] private float m_facingFalloff = 0.02f;
 
+    [Header("Output")]
+    [SerializeField] private Text m_scoreText;
+
     public float Score { get; private set; }
     public HandSelection SelectedHand => m_hand;
 
     private void Update()
     {
         Score = ComputeScore();
+        UpdateScoreText();
     }
 
     private float ComputeScore()
@@ -48,6 +53,16 @@ public class HandScore : MonoBehaviour
 
         var facingScore = ComputeFacingScore();
         return Mathf.Clamp01(flatScore * facingScore);
+    }
+
+    private void UpdateScoreText()
+    {
+        if (m_scoreText == null)
+        {
+            return;
+        }
+
+        m_scoreText.text = $"Score: {Score:0.###}";
     }
 
     private bool IsHandInsideFrustum()

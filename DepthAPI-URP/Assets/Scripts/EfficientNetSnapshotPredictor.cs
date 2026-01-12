@@ -19,6 +19,8 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     public float LastLogVariance { get; private set; }
     public float LastInferenceMs { get; private set; }
     public bool HasResult { get; private set; }
+    public bool IsCapturing => m_isCapturing;
+    public int ResultVersion { get; private set; }
 
     [Header("Mask")]
     [SerializeField] private bool m_useBinaryMask;
@@ -169,6 +171,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
                 LastLogVariance = logVar;
                 LastInferenceMs = inferenceMs;
                 HasResult = true;
+                ResultVersion++;
                 UpdateResultText();
             }
         }
