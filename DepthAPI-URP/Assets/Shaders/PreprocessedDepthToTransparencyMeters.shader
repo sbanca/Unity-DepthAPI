@@ -6,6 +6,7 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
         _EyeIndex ("Eye Index", Range(0, 1)) = 0
         _FlipV ("Flip V", Float) = 0
         _RadiusUV ("Circle Radius (UV)", Range(0, 0.75)) = 0.5
+        _Score ("Score", Range(0, 1)) = 0.5
     }
     SubShader
     {
@@ -32,6 +33,7 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
             float _EyeIndex;
             float _FlipV;
             float _RadiusUV;
+            float _Score;
 
             struct appdata
             {
@@ -55,6 +57,27 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
                 o.uv = v.uv;
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 return o;
+            }
+
+            float3 RampColor(float score)
+            {
+                float3 c0 = float3(0.1843, 0.5020, 0.9294);
+                float3 c1 = float3(0.9490, 0.7882, 0.2980);
+                float3 c2 = float3(0.4353, 0.8118, 0.5922);
+                float3 c3 = float3(0.1529, 0.6824, 0.3765);
+
+                if (score < 0.4)
+                {
+                    float t = score / 0.4;
+                    return lerp(c0, c1, t);
+                }
+                if (score < 0.7)
+                {
+                    float t = (score - 0.4) / 0.3;
+                    return lerp(c1, c2, t);
+                }
+                float t = (score - 0.7) / 0.3;
+                return lerp(c2, c3, t);
             }
 
             fixed4 frag (v2f i) : SV_Target
@@ -94,8 +117,9 @@ Shader "Unlit/EnvironmentDepthToTransparencyMeters"
 
                 bool inRange = (meters >= _DepthMinMeters) && (meters <= _DepthMaxMeters);
                 float alpha = inRange ? 0.0 : 1.0;
+                float3 color = RampColor(saturate(_Score));
 
-                return float4(0.0, 0.0, 0.0, alpha);
+                return float4(color, alpha);
             }
             ENDCG
         }
