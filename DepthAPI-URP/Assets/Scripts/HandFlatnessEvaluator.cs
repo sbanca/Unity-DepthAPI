@@ -18,6 +18,11 @@ public class HandFlatnessEvaluator : MonoBehaviour
 
     public bool LeftHandFlat { get; private set; }
     public bool RightHandFlat { get; private set; }
+    public bool LeftHasData { get; private set; }
+    public bool RightHasData { get; private set; }
+    public float LeftRms { get; private set; }
+    public float RightRms { get; private set; }
+    public float FlatnessThreshold => m_flatnessThreshold;
 
     private readonly float[] m_covariance = new float[9];
     private readonly float[] m_eigenVectors = new float[9];
@@ -28,8 +33,12 @@ public class HandFlatnessEvaluator : MonoBehaviour
 
     private void Update()
     {
-        LeftHandFlat = TryEvaluateHand(m_leftHand, out var leftHasData);
-        RightHandFlat = TryEvaluateHand(m_rightHand, out var rightHasData);
+        LeftHandFlat = TryEvaluateHand(m_leftHand, out var leftHasData, out var leftRms);
+        RightHandFlat = TryEvaluateHand(m_rightHand, out var rightHasData, out var rightRms);
+        LeftHasData = leftHasData;
+        RightHasData = rightHasData;
+        LeftRms = leftRms;
+        RightRms = rightRms;
 
         if (m_statusText == null)
         {
@@ -41,9 +50,10 @@ public class HandFlatnessEvaluator : MonoBehaviour
         UpdateText($"{m_leftLabel}: {leftStatus}\n{m_rightLabel}: {rightStatus}");
     }
 
-    private bool TryEvaluateHand(OVRSkeleton skeleton, out bool hasData)
+    private bool TryEvaluateHand(OVRSkeleton skeleton, out bool hasData, out float rms)
     {
         hasData = false;
+        rms = float.PositiveInfinity;
         if (skeleton == null || !skeleton.IsDataValid)
         {
             return false;
@@ -60,7 +70,7 @@ public class HandFlatnessEvaluator : MonoBehaviour
             return false;
         }
 
-        var rms = ComputeRmsDistance(bones, centroid, normal);
+        rms = ComputeRmsDistance(bones, centroid, normal);
         hasData = true;
         return rms <= m_flatnessThreshold;
     }

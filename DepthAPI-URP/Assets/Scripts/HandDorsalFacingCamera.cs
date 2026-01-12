@@ -16,7 +16,7 @@ public class HandDorsalFacingCamera : MonoBehaviour
     [SerializeField] private bool m_flipRightNormal;
 
     [Header("Facing")]
-    [SerializeField, Range(-1f, 1f)] private float m_facingDotThreshold = 0f;
+    [SerializeField, Range(-1f, 1f)] private float m_facingDotThreshold = 0.98f;
 
     [Header("Output")]
     [SerializeField] private Text m_statusText;
@@ -27,6 +27,11 @@ public class HandDorsalFacingCamera : MonoBehaviour
     public bool RightDorsalFacing { get; private set; }
     public float LeftPerpendicularity { get; private set; }
     public float RightPerpendicularity { get; private set; }
+    public float LeftFacingDot { get; private set; }
+    public float RightFacingDot { get; private set; }
+    public bool LeftHasData { get; private set; }
+    public bool RightHasData { get; private set; }
+    public float FacingDotThreshold => m_facingDotThreshold;
 
     private string m_lastStatus;
 
@@ -39,14 +44,22 @@ public class HandDorsalFacingCamera : MonoBehaviour
             RightDorsalFacing = false;
             LeftPerpendicularity = 0f;
             RightPerpendicularity = 0f;
+            LeftFacingDot = 0f;
+            RightFacingDot = 0f;
+            LeftHasData = false;
+            RightHasData = false;
             UpdateText("Camera: Missing");
             return;
         }
 
-        LeftDorsalFacing = TryEvaluate(m_leftHand, cam, m_flipLeftNormal, out var leftPerp);
-        RightDorsalFacing = TryEvaluate(m_rightHand, cam, m_flipRightNormal, out var rightPerp);
+        LeftDorsalFacing = TryEvaluate(m_leftHand, cam, m_flipLeftNormal, out var leftPerp, out var leftFacingDot, out var leftHasData);
+        RightDorsalFacing = TryEvaluate(m_rightHand, cam, m_flipRightNormal, out var rightPerp, out var rightFacingDot, out var rightHasData);
         LeftPerpendicularity = leftPerp;
         RightPerpendicularity = rightPerp;
+        LeftFacingDot = leftFacingDot;
+        RightFacingDot = rightFacingDot;
+        LeftHasData = leftHasData;
+        RightHasData = rightHasData;
 
         if (m_statusText == null)
         {
@@ -58,9 +71,11 @@ public class HandDorsalFacingCamera : MonoBehaviour
         UpdateText($"{m_leftLabel}: {leftStatus}\n{m_rightLabel}: {rightStatus}");
     }
 
-    private bool TryEvaluate(OVRSkeleton skeleton, Camera cam, bool flipNormal, out float perpendicularity)
+    private bool TryEvaluate(OVRSkeleton skeleton, Camera cam, bool flipNormal, out float perpendicularity, out float facingDot, out bool hasData)
     {
         perpendicularity = 0f;
+        facingDot = 0f;
+        hasData = false;
         if (skeleton == null || !skeleton.IsDataValid)
         {
             return false;
@@ -84,8 +99,9 @@ public class HandDorsalFacingCamera : MonoBehaviour
         }
 
         var toCamera = (cam.transform.position - palm).normalized;
-        var facingDot = Vector3.Dot(normal, toCamera);
+        facingDot = Vector3.Dot(normal, toCamera);
         perpendicularity = Mathf.Abs(Vector3.Dot(normal, cam.transform.forward));
+        hasData = true;
         return facingDot >= m_facingDotThreshold;
     }
 
