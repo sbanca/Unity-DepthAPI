@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public sealed class InferenceManager : MonoBehaviour
@@ -14,7 +15,8 @@ public sealed class InferenceManager : MonoBehaviour
     [SerializeField] private bool m_requireScoreDropToRetrigger = true;
 
     [Header("Batch")]
-    [SerializeField, Min(1)] private int m_predictionsPerBatch = 3;
+    [SerializeField, Min(0), FormerlySerializedAs("m_predictionsPerBatch")] private int m_leftPredictionsPerBatch = 3;
+    [SerializeField, Min(0)] private int m_rightPredictionsPerBatch = 3;
     [SerializeField, Min(0f)] private float m_delayMs = 200f;
     [SerializeField, Min(0f)] private float m_predictionTimeoutMs = 2000f;
     [SerializeField] private bool m_disableAfterBatch = true;
@@ -23,7 +25,8 @@ public sealed class InferenceManager : MonoBehaviour
     [SerializeField] private Text m_batchText;
 
     private bool m_isCollecting;
-    private bool m_armed = true;
+    private bool m_leftArmed = true;
+    private bool m_rightArmed = true;
 
     private void Update()
     {
@@ -32,20 +35,48 @@ public sealed class InferenceManager : MonoBehaviour
             return;
         }
 
-        var score = m_handScore.Score;
-        if (m_requireScoreDropToRetrigger && score < m_scoreThreshold)
-        {
-            m_armed = true;
-        }
-
         if (m_isCollecting)
         {
             return;
         }
 
-        if (score >= m_scoreThreshold && (!m_requireScoreDropToRetrigger || m_armed))
+        var leftNeeded = m_leftPredictionsPerBatch > 0;
+        var rightNeeded = m_rightPredictionsPerBatch > 0;
+        if (!leftNeeded && !rightNeeded)
         {
-            m_armed = false;
+            return;
+        }
+
+        var nextHand = leftNeeded ? HandScore.HandSelection.Left : HandScore.HandSelection.Right;
+        m_handScore.SetHandSelection(nextHand);
+        var score = m_handScore.Score;
+
+        if (m_requireScoreDropToRetrigger)
+        {
+            if (nextHand == HandScore.HandSelection.Left && score < m_scoreThreshold)
+            {
+                m_leftArmed = true;
+            }
+
+            if (nextHand == HandScore.HandSelection.Right && score < m_scoreThreshold)
+            {
+                m_rightArmed = true;
+            }
+        }
+
+        var handArmed = nextHand == HandScore.HandSelection.Left ? m_leftArmed : m_rightArmed;
+        var ready = score >= m_scoreThreshold && (!m_requireScoreDropToRetrigger || handArmed);
+        if (ready)
+        {
+            if (nextHand == HandScore.HandSelection.Left)
+            {
+                m_leftArmed = false;
+            }
+            else
+            {
+                m_rightArmed = false;
+            }
+
             StartCoroutine(CollectBatch());
         }
     }
@@ -53,17 +84,22 @@ public sealed class InferenceManager : MonoBehaviour
     private IEnumerator CollectBatch()
     {
         m_isCollecting = true;
-        m_collector.Begin(m_predictionsPerBatch);
+        m_collector.Begin(m_leftPredictionsPerBatch, m_rightPredictionsPerBatch);
 
         var delaySeconds = Mathf.Max(0f, m_delayMs) * 0.001f;
-        for (var i = 0; i < m_predictionsPerBatch; i++)
-        {
-            yield return CaptureOnce();
 
-            if (i < m_predictionsPerBatch - 1 && delaySeconds > 0f)
-            {
-                yield return new WaitForSeconds(delaySeconds);
-            }
+        if (m_leftPredictionsPerBatch > 0)
+        {
+            m_handScore.SetHandSelection(HandScore.HandSelection.Left);
+            yield return WaitForHandReady(HandScore.HandSelection.Left);
+            yield return CaptureHandBatch(HandScore.HandSelection.Left, m_leftPredictionsPerBatch, delaySeconds);
+        }
+
+        if (m_rightPredictionsPerBatch > 0)
+        {
+            m_handScore.SetHandSelection(HandScore.HandSelection.Right);
+            yield return WaitForHandReady(HandScore.HandSelection.Right);
+            yield return CaptureHandBatch(HandScore.HandSelection.Right, m_rightPredictionsPerBatch, delaySeconds);
         }
 
         m_collector.Complete();
@@ -77,7 +113,7 @@ public sealed class InferenceManager : MonoBehaviour
         }
     }
 
-    private IEnumerator CaptureOnce()
+    private IEnumerator CaptureOnce(HandScore.HandSelection hand)
     {
         if (m_predictor == null || m_collector == null)
         {
@@ -101,8 +137,65 @@ public sealed class InferenceManager : MonoBehaviour
 
         if (m_predictor.ResultVersion != startVersion && m_predictor.HasResult)
         {
-            m_collector.AddSample(m_predictor.LastMean, m_predictor.LastLogVariance, m_predictor.LastInferenceMs);
+            m_collector.AddSample(hand, m_predictor.LastMean, m_predictor.LastLogVariance, m_predictor.LastInferenceMs);
         }
+    }
+
+    private IEnumerator CaptureHandBatch(HandScore.HandSelection hand, int count, float delaySeconds)
+    {
+        if (count <= 0)
+        {
+            yield break;
+        }
+
+        for (var i = 0; i < count; i++)
+        {
+            if (!m_collector.IsCollecting)
+            {
+                yield break;
+            }
+
+            yield return CaptureOnce(hand);
+
+            if (i < count - 1 && delaySeconds > 0f)
+            {
+                yield return new WaitForSeconds(delaySeconds);
+            }
+        }
+    }
+
+    private IEnumerator WaitForHandReady(HandScore.HandSelection hand)
+    {
+        if (m_handScore == null)
+        {
+            yield break;
+        }
+
+        while (m_handScore.Score < m_scoreThreshold)
+        {
+            yield return null;
+        }
+    }
+
+    public void ResetInference()
+    {
+        StopAllCoroutines();
+        m_isCollecting = false;
+        m_leftArmed = true;
+        m_rightArmed = true;
+
+        if (m_collector != null)
+        {
+            m_collector.Clear();
+        }
+
+        UpdateBatchText();
+        if (m_handScore != null)
+        {
+            var nextHand = m_leftPredictionsPerBatch > 0 ? HandScore.HandSelection.Left : HandScore.HandSelection.Right;
+            m_handScore.SetHandSelection(nextHand);
+        }
+        enabled = true;
     }
 
     private void UpdateBatchText()
@@ -119,13 +212,17 @@ public sealed class InferenceManager : MonoBehaviour
             return;
         }
 
+        var leftCount = m_collector.LeftCount;
+        var rightCount = m_collector.RightCount;
+        var leftTarget = m_collector.LeftTargetCount;
+        var rightTarget = m_collector.RightTargetCount;
         var mean = m_collector.AverageMean;
         var logVar = m_collector.AverageLogVariance;
         var stdDev = m_collector.AverageStdDev;
         var inferMs = m_collector.AverageInferenceMs;
 
         m_batchText.text =
-            $"Batch: {count}\n" +
+            $"Batch: {count} (L {leftCount}/{leftTarget}, R {rightCount}/{rightTarget})\n" +
             $"Mean: {mean:0.###}\n" +
             $"LogVar: {logVar:0.###}\n" +
             $"StdDev: {stdDev:0.###}\n" +

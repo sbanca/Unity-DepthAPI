@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DemoSettings
   m_EditorClassIdentifier: 
   minMeters: 0.16
-  maxMeters: 0.28
+  maxMeters: 0.29
   meanThresholdMin: 0.245
   meanThresholdMax: 0.255
   stdThresholdMin: 0

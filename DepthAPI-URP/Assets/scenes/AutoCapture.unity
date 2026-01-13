@@ -8971,7 +8971,7 @@ PrefabInstance:
         type: 3}
       propertyPath: webcamManager
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 855815145}
     - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
       propertyPath: m_maskMaterial
@@ -9044,9 +9044,10 @@ MonoBehaviour:
   m_handScore: {fileID: 2115843716}
   m_predictor: {fileID: 6450325907155778066}
   m_collector: {fileID: 6450325907155778069}
-  m_scoreThreshold: 0.93
+  m_scoreThreshold: 0.901
   m_requireScoreDropToRetrigger: 0
-  m_predictionsPerBatch: 4
+  m_leftPredictionsPerBatch: 3
+  m_rightPredictionsPerBatch: 3
   m_delayMs: 200
   m_predictionTimeoutMs: 10000
   m_disableAfterBatch: 1
@@ -9524,6 +9525,36 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
         type: 3}
+      propertyPath: bindings.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
+      propertyPath: bindings.Array.data[6].key
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
+      propertyPath: bindings.Array.data[6].name
+      value: Reset
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
+      propertyPath: bindings.Array.data[6].ovrRawButton
+      value: 256
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
+      propertyPath: bindings.Array.data[6].onTriggered.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
+      propertyPath: bindings.Array.data[6].onTriggered.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
       propertyPath: bindings.Array.data[0].onTriggered.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 3709801807292519150}
@@ -9559,8 +9590,33 @@ PrefabInstance:
       objectReference: {fileID: 999457077}
     - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
         type: 3}
+      propertyPath: bindings.Array.data[6].onTriggered.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 6450325907155778070}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
+      propertyPath: bindings.Array.data[6].onTriggered.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
       propertyPath: bindings.Array.data[0].onTriggered.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
       value: SaveCurrentFrame
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
+      propertyPath: bindings.Array.data[6].onTriggered.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ResetInference
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
+      propertyPath: bindings.Array.data[6].onTriggered.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: InferenceManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
+      propertyPath: bindings.Array.data[6].onTriggered.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 4145361243187075302, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
         type: 3}

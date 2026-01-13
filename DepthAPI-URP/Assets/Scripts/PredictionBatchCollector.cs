@@ -1,17 +1,21 @@
 using System.Collections.Generic;
 using UnityEngine;
+using HandSelection = HandScore.HandSelection;
 
 public sealed class PredictionBatchCollector : MonoBehaviour
 {
+
     public readonly struct PredictionSample
     {
+        public readonly HandSelection Hand;
         public readonly float Mean;
         public readonly float LogVariance;
         public readonly float InferenceMs;
         public readonly float Timestamp;
 
-        public PredictionSample(float mean, float logVariance, float inferenceMs, float timestamp)
+        public PredictionSample(HandSelection hand, float mean, float logVariance, float inferenceMs, float timestamp)
         {
+            Hand = hand;
             Mean = mean;
             LogVariance = logVariance;
             InferenceMs = inferenceMs;
@@ -23,33 +27,67 @@ public sealed class PredictionBatchCollector : MonoBehaviour
 
     public IReadOnlyList<PredictionSample> Samples => m_samples;
     public int TargetCount { get; private set; }
+    public int LeftTargetCount { get; private set; }
+    public int RightTargetCount { get; private set; }
+    public int LeftCount { get; private set; }
+    public int RightCount { get; private set; }
     public bool IsCollecting { get; private set; }
 
     public int Count => m_samples.Count;
 
     public void Begin(int targetCount)
     {
+        Begin(targetCount, targetCount);
+    }
+
+    public void Begin(int leftTargetCount, int rightTargetCount)
+    {
         Clear();
-        TargetCount = Mathf.Max(1, targetCount);
-        IsCollecting = true;
+        LeftTargetCount = Mathf.Max(0, leftTargetCount);
+        RightTargetCount = Mathf.Max(0, rightTargetCount);
+        TargetCount = LeftTargetCount + RightTargetCount;
+        IsCollecting = TargetCount > 0;
     }
 
     public void Clear()
     {
         m_samples.Clear();
         TargetCount = 0;
+        LeftTargetCount = 0;
+        RightTargetCount = 0;
+        LeftCount = 0;
+        RightCount = 0;
         IsCollecting = false;
     }
 
-    public bool AddSample(float mean, float logVariance, float inferenceMs)
+    public bool AddSample(HandSelection hand, float mean, float logVariance, float inferenceMs)
     {
         if (!IsCollecting)
         {
             return false;
         }
 
-        m_samples.Add(new PredictionSample(mean, logVariance, inferenceMs, Time.realtimeSinceStartup));
-        if (m_samples.Count >= TargetCount)
+        if (hand == HandSelection.Left && LeftCount >= LeftTargetCount)
+        {
+            return false;
+        }
+
+        if (hand == HandSelection.Right && RightCount >= RightTargetCount)
+        {
+            return false;
+        }
+
+        m_samples.Add(new PredictionSample(hand, mean, logVariance, inferenceMs, Time.realtimeSinceStartup));
+        if (hand == HandSelection.Left)
+        {
+            LeftCount++;
+        }
+        else
+        {
+            RightCount++;
+        }
+
+        if ((LeftCount >= LeftTargetCount) && (RightCount >= RightTargetCount))
         {
             IsCollecting = false;
         }

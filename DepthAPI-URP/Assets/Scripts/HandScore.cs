@@ -29,29 +29,46 @@ public class HandScore : MonoBehaviour
 
     private void Update()
     {
-        Score = ComputeScore();
+        Score = ComputeScore(m_hand);
         UpdateScoreText();
     }
 
-    private float ComputeScore()
+    public void SetHandSelection(HandSelection hand)
+    {
+        if (m_hand == hand)
+        {
+            return;
+        }
+
+        m_hand = hand;
+        Score = ComputeScore(m_hand);
+        UpdateScoreText();
+    }
+
+    public float GetScoreFor(HandSelection hand)
+    {
+        return ComputeScore(hand);
+    }
+
+    private float ComputeScore(HandSelection hand)
     {
         if (m_frustumCheck == null || m_flatness == null || m_dorsalFacing == null)
         {
             return 0f;
         }
 
-        if (!IsHandInsideFrustum())
+        if (!IsHandInsideFrustum(hand))
         {
             return 0f;
         }
 
-        var flatScore = ComputeFlatnessScore();
+        var flatScore = ComputeFlatnessScore(hand);
         if (flatScore <= 0f)
         {
             return 0f;
         }
 
-        var facingScore = ComputeFacingScore();
+        var facingScore = ComputeFacingScore(hand);
         return Mathf.Clamp01(flatScore * facingScore);
     }
 
@@ -65,20 +82,20 @@ public class HandScore : MonoBehaviour
         m_scoreText.text = $"Score: {Score:0.###}";
     }
 
-    private bool IsHandInsideFrustum()
+    private bool IsHandInsideFrustum(HandSelection hand)
     {
-        return m_hand == HandSelection.Left ? m_frustumCheck.LeftHandAllInside : m_frustumCheck.RightHandAllInside;
+        return hand == HandSelection.Left ? m_frustumCheck.LeftHandAllInside : m_frustumCheck.RightHandAllInside;
     }
 
-    private float ComputeFlatnessScore()
+    private float ComputeFlatnessScore(HandSelection hand)
     {
-        var hasData = m_hand == HandSelection.Left ? m_flatness.LeftHasData : m_flatness.RightHasData;
+        var hasData = hand == HandSelection.Left ? m_flatness.LeftHasData : m_flatness.RightHasData;
         if (!hasData)
         {
             return 0f;
         }
 
-        var rms = m_hand == HandSelection.Left ? m_flatness.LeftRms : m_flatness.RightRms;
+        var rms = hand == HandSelection.Left ? m_flatness.LeftRms : m_flatness.RightRms;
         var threshold = m_flatness.FlatnessThreshold;
         if (threshold <= 0f)
         {
@@ -90,15 +107,15 @@ public class HandScore : MonoBehaviour
         return Mathf.Clamp01(score);
     }
 
-    private float ComputeFacingScore()
+    private float ComputeFacingScore(HandSelection hand)
     {
-        var hasData = m_hand == HandSelection.Left ? m_dorsalFacing.LeftHasData : m_dorsalFacing.RightHasData;
+        var hasData = hand == HandSelection.Left ? m_dorsalFacing.LeftHasData : m_dorsalFacing.RightHasData;
         if (!hasData)
         {
             return 0f;
         }
 
-        var facingDot = m_hand == HandSelection.Left ? m_dorsalFacing.LeftFacingDot : m_dorsalFacing.RightFacingDot;
+        var facingDot = hand == HandSelection.Left ? m_dorsalFacing.LeftFacingDot : m_dorsalFacing.RightFacingDot;
         var threshold = m_dorsalFacing.FacingDotThreshold;
         if (threshold <= 0f)
         {
