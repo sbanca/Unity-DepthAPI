@@ -1,5 +1,7 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
+using TMPro;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -23,6 +25,8 @@ public sealed class InferenceManager : MonoBehaviour
 
     [Header("Output")]
     [SerializeField] private Text m_batchText;
+    [SerializeField] private TMP_Text m_batchTmpText;
+    [SerializeField] private UnityEvent m_onBatchCompleted;
 
     private bool m_isCollecting;
     private bool m_leftArmed = true;
@@ -106,6 +110,7 @@ public sealed class InferenceManager : MonoBehaviour
         m_isCollecting = false;
 
         UpdateBatchText();
+        m_onBatchCompleted?.Invoke();
 
         if (m_disableAfterBatch)
         {
@@ -200,7 +205,7 @@ public sealed class InferenceManager : MonoBehaviour
 
     private void UpdateBatchText()
     {
-        if (m_batchText == null || m_collector == null)
+        if ((m_batchText == null && m_batchTmpText == null) || m_collector == null)
         {
             return;
         }
@@ -208,7 +213,7 @@ public sealed class InferenceManager : MonoBehaviour
         var count = m_collector.Count;
         if (count <= 0)
         {
-            m_batchText.text = "Batch: No samples";
+            SetBatchText("Batch: No samples");
             return;
         }
 
@@ -221,11 +226,25 @@ public sealed class InferenceManager : MonoBehaviour
         var stdDev = m_collector.AverageStdDev;
         var inferMs = m_collector.AverageInferenceMs;
 
-        m_batchText.text =
+        var text =
             $"Batch: {count} (L {leftCount}/{leftTarget}, R {rightCount}/{rightTarget})\n" +
             $"Mean: {mean:0.###}\n" +
             $"LogVar: {logVar:0.###}\n" +
             $"StdDev: {stdDev:0.###}\n" +
             $"Inference: {inferMs:0.##} ms";
+        SetBatchText(text);
+    }
+
+    private void SetBatchText(string text)
+    {
+        if (m_batchTmpText != null)
+        {
+            m_batchTmpText.text = text;
+        }
+
+        if (m_batchText != null)
+        {
+            m_batchText.text = text;
+        }
     }
 }
