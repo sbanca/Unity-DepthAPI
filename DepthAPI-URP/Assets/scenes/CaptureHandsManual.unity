@@ -615,6 +615,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI_Debug
       objectReference: {fileID: 0}
+    - target: {fileID: 8773777662279500572, guid: 526b204903722da42ab75a5734c3d027,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8879574086578560077, guid: 526b204903722da42ab75a5734c3d027,
         type: 3}
       propertyPath: m_Sources.Array.data[0].sourceTransform
@@ -10475,6 +10480,11 @@ PrefabInstance:
       propertyPath: camMgr
       value: 
       objectReference: {fileID: 855815145}
+    - target: {fileID: 4536159521664577255, guid: d6c279bd47094624c9431f5d4e7726b7,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4848857568156638666, guid: d6c279bd47094624c9431f5d4e7726b7,
         type: 3}
       propertyPath: m_Enabled
@@ -10483,7 +10493,7 @@ PrefabInstance:
     - target: {fileID: 6477154140481652730, guid: d6c279bd47094624c9431f5d4e7726b7,
         type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6741612718051489888, guid: d6c279bd47094624c9431f5d4e7726b7,
         type: 3}

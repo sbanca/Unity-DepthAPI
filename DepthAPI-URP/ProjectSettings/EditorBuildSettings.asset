@@ -38,15 +38,15 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/scenes/obsolete/CaptureHands.unity
     guid: 02402155de0081049ace99585f078a56
-  - enabled: 0
+  - enabled: 1
     path: Assets/scenes/CaptureHandsManual.unity
     guid: 2082e3ef8a9997349a3650576a44c15e
-  - enabled: 0
-    path: Assets/scenes/AutoCapture.unity
-    guid: 33dd46e9289e8a742af87f975a186959
   - enabled: 1
     path: Assets/scenes/DemoScene.unity
     guid: 050f63cea21f29d4ba93ad987e8e339f
+  - enabled: 0
+    path: Assets/scenes/AutoCapture.unity
+    guid: 33dd46e9289e8a742af87f975a186959
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 7dc924bb27a54ae49b2b998c2868fcdc,
       type: 2}
