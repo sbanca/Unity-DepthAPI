@@ -101,7 +101,7 @@ public sealed class PredictionBatchCollector : MonoBehaviour
     }
 
     public float AverageMean => GetAverage(m_samples, s => s.Mean);
-    public float AverageLogVariance => GetAverage(m_samples, s => s.LogVariance);
+    public float AverageLogVariance => Mathf.Log(Mathf.Max(1e-6f, AverageVariance));
     public float AverageInferenceMs => GetAverage(m_samples, s => s.InferenceMs);
     public float AverageVariance => GetAverage(m_samples, s => Mathf.Exp(s.LogVariance));
     public float AverageStdDev => Mathf.Sqrt(Mathf.Max(0f, AverageVariance));
