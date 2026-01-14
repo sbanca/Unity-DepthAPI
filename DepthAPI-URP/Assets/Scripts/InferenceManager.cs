@@ -7,6 +7,9 @@ using UnityEngine.UI;
 
 public sealed class InferenceManager : MonoBehaviour
 {
+    [System.Serializable]
+    public class BatchMeansEvent : UnityEvent<float, float> { }
+
     [Header("Inputs")]
     [SerializeField] private HandScore m_handScore;
     [SerializeField] private EfficientNetSnapshotPredictor m_predictor;
@@ -26,6 +29,7 @@ public sealed class InferenceManager : MonoBehaviour
     [Header("Output")]
     [SerializeField] private Text m_batchText;
     [SerializeField] private TMP_Text m_batchTmpText;
+    [SerializeField] private BatchMeansEvent m_onBatchMeansReady;
     [SerializeField] private UnityEvent m_onBatchCompleted;
 
     private bool m_isCollecting;
@@ -110,6 +114,7 @@ public sealed class InferenceManager : MonoBehaviour
         m_isCollecting = false;
 
         UpdateBatchText();
+        InvokeBatchMeansEvent();
         m_onBatchCompleted?.Invoke();
 
         if (m_disableAfterBatch)
@@ -233,6 +238,18 @@ public sealed class InferenceManager : MonoBehaviour
             $"StdDev: {stdDev:0.###}\n" +
             $"Inference: {inferMs:0.##} ms";
         SetBatchText(text);
+    }
+
+    private void InvokeBatchMeansEvent()
+    {
+        if (m_collector == null || m_collector.Count <= 0)
+        {
+            return;
+        }
+
+        var mean = m_collector.AverageMean;
+        var logVar = m_collector.AverageLogVariance;
+        m_onBatchMeansReady?.Invoke(mean, logVar);
     }
 
     private void SetBatchText(string text)
