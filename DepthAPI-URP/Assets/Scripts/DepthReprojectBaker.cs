@@ -154,8 +154,6 @@ public class DepthReprojectBaker : MonoBehaviour
         if (metersRT)
         {
             if (metersRT.IsCreated()) metersRT.Release();
-            Destroy(metersRT);
-            metersRT = null;
         }
     }
 }
