@@ -136,6 +136,7 @@ public sealed class InferenceManager : MonoBehaviour
         }
 
         var startVersion = m_predictor.ResultVersion;
+        m_predictor.CaptureInputPng = m_collector.SavePredictionImages;
         m_predictor.CaptureAndPredict();
 
         var timeoutSeconds = Mathf.Max(0f, m_predictionTimeoutMs) * 0.001f;
@@ -147,7 +148,13 @@ public sealed class InferenceManager : MonoBehaviour
 
         if (m_predictor.ResultVersion != startVersion && m_predictor.HasResult)
         {
-            m_collector.AddSample(hand, m_predictor.LastMean, m_predictor.LastLogVariance, m_predictor.LastInferenceMs);
+            byte[] inputPng = null;
+            if (m_collector.SavePredictionImages)
+            {
+                m_predictor.TryConsumeLastInputPng(m_predictor.ResultVersion, out inputPng);
+            }
+
+            m_collector.AddSample(hand, m_predictor.LastMean, m_predictor.LastLogVariance, m_predictor.LastInferenceMs, inputPng);
         }
     }
 

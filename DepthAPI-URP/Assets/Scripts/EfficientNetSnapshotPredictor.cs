@@ -22,6 +22,14 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     public bool IsCapturing => m_isCapturing;
     public int ResultVersion { get; private set; }
 
+    [Header("Capture")]
+    [SerializeField] private bool m_captureInputPng;
+    public bool CaptureInputPng
+    {
+        get => m_captureInputPng;
+        set => m_captureInputPng = value;
+    }
+
     [Header("Mask")]
     [SerializeField] private bool m_useBinaryMask;
     [SerializeField] private DepthReprojectBaker m_depthMaskSource;
@@ -37,6 +45,8 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     private RenderTexture m_debugTexture;
     private MaterialPropertyBlock m_debugPropertyBlock;
     private Material m_runtimeMaskMaterial;
+    private byte[] m_lastInputPng;
+    private int m_lastInputVersion;
 
     public void CaptureAndPredict()
     {
@@ -51,6 +61,8 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     private IEnumerator CaptureAndPredictCoroutine()
     {
         m_isCapturing = true;
+        m_lastInputPng = null;
+        m_lastInputVersion = 0;
         RenderTexture inputTexture = null;
         RenderTexture maskTexture = null;
         RenderTexture maskedInputTexture = null;
@@ -172,6 +184,11 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
                 LastInferenceMs = inferenceMs;
                 HasResult = true;
                 ResultVersion++;
+                if (m_captureInputPng)
+                {
+                    m_lastInputPng = EncodeToPng(finalInputTexture);
+                    m_lastInputVersion = ResultVersion;
+                }
                 UpdateResultText();
             }
         }
@@ -347,5 +364,36 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
             $"Mean: {LastMean:0.###}\n" +
             $"LogVar: {LastLogVariance:0.###}\n" +
             $"Inference: {LastInferenceMs:0.##} ms";
+    }
+
+    public bool TryConsumeLastInputPng(int expectedVersion, out byte[] png)
+    {
+        if (m_lastInputPng != null && m_lastInputVersion == expectedVersion)
+        {
+            png = m_lastInputPng;
+            m_lastInputPng = null;
+            return true;
+        }
+
+        png = null;
+        return false;
+    }
+
+    private static byte[] EncodeToPng(RenderTexture source)
+    {
+        if (source == null)
+        {
+            return null;
+        }
+
+        var previous = RenderTexture.active;
+        RenderTexture.active = source;
+        var tex = new Texture2D(source.width, source.height, TextureFormat.RGBA32, false);
+        tex.ReadPixels(new Rect(0f, 0f, source.width, source.height), 0, 0, false);
+        tex.Apply(false, false);
+        RenderTexture.active = previous;
+        var png = tex.EncodeToPNG();
+        Destroy(tex);
+        return png;
     }
 }
