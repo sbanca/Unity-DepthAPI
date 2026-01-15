@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -17,6 +18,9 @@ public sealed class AgeGate : MonoBehaviour
     [Header("Events")]
     [SerializeField] private UnityEvent m_onAdmitted;
     [SerializeField] private UnityEvent m_onRejected;
+
+    [Header("Output")]
+    [SerializeField] private TMP_Text m_statusTmpText;
 
     public float LastPAdult { get; private set; }
     public bool LastAdmitted { get; private set; }
@@ -47,6 +51,7 @@ public sealed class AgeGate : MonoBehaviour
         LastPAdult = pAdult;
         LastAdmitted = ShouldAdmit(pAdult);
         HasResult = true;
+        UpdateStatusText();
         return LastAdmitted;
     }
 
@@ -81,5 +86,31 @@ public sealed class AgeGate : MonoBehaviour
         var t = 1f / (1f + 0.3275911f * x);
         var y = 1f - (((((1.061405429f * t - 1.453152027f) * t) + 1.421413741f) * t - 0.284496736f) * t + 0.254829592f) * t * Mathf.Exp(-x * x);
         return sign * y;
+    }
+
+    private void OnEnable()
+    {
+        UpdateStatusText();
+    }
+
+    private void OnValidate()
+    {
+        UpdateStatusText();
+    }
+
+    private void UpdateStatusText()
+    {
+        if (m_statusTmpText == null)
+        {
+            return;
+        }
+
+        var pAdultText = HasResult ? $"{LastPAdult:0.###}" : "N/A";
+        var policyText = m_policy == Policy.ChildOnly ? "Children only" : "Adults only";
+        m_statusTmpText.text =
+            $"Policy: {policyText}\n" +
+            $"Adult probability: {pAdultText}\n" +
+            $"Decision threshold (tau): {m_tau:0.###}\n" +
+            $"Adult age threshold: {m_ageThreshold:0.###}";
     }
 }
