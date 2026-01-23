@@ -21828,6 +21828,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 6450325907155778073}
+    - targetCorrespondingSourceObject: {fileID: 3657254597569055560, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6450325907155778077}
   m_SourcePrefab: {fileID: 100100000, guid: 2f320d8b4cfb476419a780ce145435aa, type: 3}
 --- !u!114 &6450325907155778066 stripped
 MonoBehaviour:
@@ -22158,6 +22162,24 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   m_statusTmpText: {fileID: 1645014355}
+--- !u!114 &6450325907155778077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373883862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9a6d845527d46b8b10a534d791188a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PredictionBatchCsvSaver
+  m_collector: {fileID: 6450325907155778069}
+  m_autoFindCollector: 1
+  m_folder: PredictionBatch
+  m_batchPrefix: batch_
+  m_fileName: batch.csv
+  m_includeHeader: 1
 --- !u!1001 &6886293773963461330
 PrefabInstance:
   m_ObjectHideFlags: 0
