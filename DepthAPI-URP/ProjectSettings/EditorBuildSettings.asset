@@ -38,6 +38,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/scenes/obsolete/CaptureHands.unity
     guid: 02402155de0081049ace99585f078a56
+  - enabled: 0
+    path: Assets/PassthroughCameraApiSamples/BrightnessEstimation/BrightnessEstimation.unity
+    guid: 8ea13e682474e1748965f8e21972f2b2
   - enabled: 1
     path: Assets/scenes/DemoScene.unity
     guid: 050f63cea21f29d4ba93ad987e8e339f
@@ -49,6 +52,8 @@ EditorBuildSettings:
     guid: 33dd46e9289e8a742af87f975a186959
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 7dc924bb27a54ae49b2b998c2868fcdc,
+      type: 2}
+    com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f,
       type: 2}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: acd3b4b600544164da5b92513f0abe5e,
       type: 2}
