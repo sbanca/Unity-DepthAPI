@@ -15,6 +15,8 @@ public sealed class PredictionBatchCsvSaver : MonoBehaviour
     [SerializeField] private string m_batchPrefix = "batch_";
     [SerializeField] private string m_fileName = "batch.csv";
     [SerializeField] private bool m_includeHeader = true;
+    [SerializeField] private bool m_saveImages = true;
+    [SerializeField] private string m_imagePrefix = "Prediction";
 
     private void OnEnable()
     {
@@ -53,6 +55,8 @@ public sealed class PredictionBatchCsvSaver : MonoBehaviour
         var fileName = string.IsNullOrWhiteSpace(m_fileName) ? "batch.csv" : m_fileName;
         var path = Path.Combine(root, fileName);
 
+        var imagePaths = m_saveImages ? SaveImages(batch, root) : null;
+
         var sb = new StringBuilder(256 + batch.Count * 128);
         if (m_includeHeader)
         {
@@ -70,11 +74,60 @@ public sealed class PredictionBatchCsvSaver : MonoBehaviour
             sb.Append(sample.InferenceMs.ToString("G9", inv)).Append(',');
             sb.Append(sample.Brightness.ToString("G9", inv)).Append(',');
             sb.Append(sample.Timestamp.ToString("G9", inv)).Append(',');
-            sb.Append(EscapeCsv(sample.ImagePath));
+            var imagePath = imagePaths != null && i < imagePaths.Length ? imagePaths[i] : sample.ImagePath;
+            sb.Append(EscapeCsv(imagePath));
             sb.AppendLine();
         }
 
         File.WriteAllText(path, sb.ToString());
+    }
+
+    private string[] SaveImages(PredictionBatchCollector.PredictionBatch batch, string root)
+    {
+        var paths = new string[batch.Count];
+        var prefix = string.IsNullOrWhiteSpace(m_imagePrefix) ? "Prediction" : m_imagePrefix;
+
+        for (var i = 0; i < batch.Count; i++)
+        {
+            var sample = batch.Samples[i];
+            var png = (batch.ImagePngs != null && i < batch.ImagePngs.Count) ? batch.ImagePngs[i] : null;
+
+            if (png != null && png.Length > 0)
+            {
+                var fileName = $"{prefix}_{i:000}_{sample.Hand}.png";
+                var fullPath = Path.Combine(root, fileName);
+                try
+                {
+                    File.WriteAllBytes(fullPath, png);
+                    paths[i] = fullPath;
+                    continue;
+                }
+                catch
+                {
+                    // fall through to try copying an existing file if available
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(sample.ImagePath) && File.Exists(sample.ImagePath))
+            {
+                var existingName = Path.GetFileName(sample.ImagePath);
+                var targetName = string.IsNullOrWhiteSpace(existingName)
+                    ? $"{prefix}_{i:000}_{sample.Hand}.png"
+                    : existingName;
+                var targetPath = Path.Combine(root, targetName);
+                try
+                {
+                    File.Copy(sample.ImagePath, targetPath, true);
+                    paths[i] = targetPath;
+                }
+                catch
+                {
+                    paths[i] = sample.ImagePath;
+                }
+            }
+        }
+
+        return paths;
     }
 
     private static string EscapeCsv(string value)
