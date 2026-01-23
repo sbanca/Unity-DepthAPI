@@ -18,6 +18,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     public float LastMean { get; private set; }
     public float LastLogVariance { get; private set; }
     public float LastInferenceMs { get; private set; }
+    public float LastBrightness { get; private set; }
     public bool HasResult { get; private set; }
     public bool IsCapturing => m_isCapturing;
     public int ResultVersion { get; private set; }
@@ -47,6 +48,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     private Material m_runtimeMaskMaterial;
     private byte[] m_lastInputPng;
     private int m_lastInputVersion;
+    private const float BrightnessSentinel = -1f;
 
     public void CaptureAndPredict()
     {
@@ -63,6 +65,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
         m_isCapturing = true;
         m_lastInputPng = null;
         m_lastInputVersion = 0;
+        LastBrightness = BrightnessSentinel;
         RenderTexture inputTexture = null;
         RenderTexture maskTexture = null;
         RenderTexture maskedInputTexture = null;
@@ -174,6 +177,8 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
                     }
                 }
             }
+
+            LastBrightness = ComputeBrightness(inputTexture, maskTexture, m_useBinaryMask, m_maskThreshold);
 
             UpdateDebugTexture(finalInputTexture, targetSize);
 
@@ -395,5 +400,122 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
         var png = tex.EncodeToPNG();
         Destroy(tex);
         return png;
+    }
+
+    private float ComputeBrightness(RenderTexture colorTexture, RenderTexture maskTexture, bool useMask, float threshold)
+    {
+        if (colorTexture == null)
+        {
+            return BrightnessSentinel;
+        }
+
+        if (!useMask)
+        {
+            return ComputeAverageLuminance(colorTexture);
+        }
+
+        if (maskTexture == null)
+        {
+            return BrightnessSentinel;
+        }
+
+        if (colorTexture.width != maskTexture.width || colorTexture.height != maskTexture.height)
+        {
+            return BrightnessSentinel;
+        }
+
+        var colorTex = ReadbackTexture(colorTexture, TextureFormat.RGBA32, false);
+        var maskTex = ReadbackTexture(maskTexture, TextureFormat.RGBA32, true);
+        try
+        {
+            var colors = colorTex.GetPixels32();
+            var masks = maskTex.GetPixels32();
+            return ComputeAverageLuminanceMasked(colors, masks, threshold);
+        }
+        finally
+        {
+            Destroy(colorTex);
+            Destroy(maskTex);
+        }
+    }
+
+    private static float ComputeAverageLuminance(RenderTexture source)
+    {
+        var tex = ReadbackTexture(source, TextureFormat.RGBA32, false);
+        try
+        {
+            var colors = tex.GetPixels32();
+            return ComputeAverageLuminance(colors);
+        }
+        finally
+        {
+            Destroy(tex);
+        }
+    }
+
+    private static float ComputeAverageLuminance(Color32[] colors)
+    {
+        if (colors == null || colors.Length == 0)
+        {
+            return BrightnessSentinel;
+        }
+
+        double sum = 0.0;
+        for (var i = 0; i < colors.Length; i++)
+        {
+            var c = colors[i];
+            var r = c.r / 255f;
+            var g = c.g / 255f;
+            var b = c.b / 255f;
+            sum += 0.2126f * r + 0.7152f * g + 0.0722f * b;
+        }
+
+        return (float)(sum / colors.Length);
+    }
+
+    private static float ComputeAverageLuminanceMasked(Color32[] colors, Color32[] masks, float threshold)
+    {
+        if (colors == null || masks == null || colors.Length == 0)
+        {
+            return BrightnessSentinel;
+        }
+
+        var count = Mathf.Min(colors.Length, masks.Length);
+        var t = Mathf.Clamp01(threshold);
+        double sum = 0.0;
+        var valid = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var mask = masks[i].r / 255f;
+            if (mask < t)
+            {
+                continue;
+            }
+
+            var c = colors[i];
+            var r = c.r / 255f;
+            var g = c.g / 255f;
+            var b = c.b / 255f;
+            sum += 0.2126f * r + 0.7152f * g + 0.0722f * b;
+            valid++;
+        }
+
+        if (valid <= 0)
+        {
+            return BrightnessSentinel;
+        }
+
+        return (float)(sum / valid);
+    }
+
+    private static Texture2D ReadbackTexture(RenderTexture source, TextureFormat format, bool linear)
+    {
+        var prev = RenderTexture.active;
+        RenderTexture.active = source;
+        var tex = new Texture2D(source.width, source.height, format, false, linear);
+        tex.ReadPixels(new Rect(0f, 0f, source.width, source.height), 0, 0, false);
+        tex.Apply(false, false);
+        RenderTexture.active = prev;
+        return tex;
     }
 }

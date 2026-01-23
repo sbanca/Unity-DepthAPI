@@ -154,7 +154,7 @@ public sealed class InferenceManager : MonoBehaviour
                 m_predictor.TryConsumeLastInputPng(m_predictor.ResultVersion, out inputPng);
             }
 
-            m_collector.AddSample(hand, m_predictor.LastMean, m_predictor.LastLogVariance, m_predictor.LastInferenceMs, inputPng);
+            m_collector.AddSample(hand, m_predictor.LastMean, m_predictor.LastLogVariance, m_predictor.LastInferenceMs, m_predictor.LastBrightness, inputPng);
         }
     }
 

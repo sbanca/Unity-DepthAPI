@@ -13,6 +13,7 @@ public sealed class PredictionBatchThumbnailApplier : MonoBehaviour
         public Image Thumbnail;
         public TMP_Text Label;
         public TMP_Text SecondaryLabel;
+        public TMP_Text TertiaryLabel;
 
         [NonSerialized] public Texture2D RuntimeTexture;
         [NonSerialized] public Sprite RuntimeSprite;
@@ -29,6 +30,7 @@ public sealed class PredictionBatchThumbnailApplier : MonoBehaviour
     [SerializeField] private string m_elementsName = "Elements";
     [SerializeField] private string m_labelName = "Label";
     [SerializeField] private string m_labelSecondaryName = "Label (1)";
+    [SerializeField] private string m_labelTertiaryName = "Label (2)";
 
     [Header("Display")]
     [SerializeField] private bool m_preserveAspect = true;
@@ -38,6 +40,8 @@ public sealed class PredictionBatchThumbnailApplier : MonoBehaviour
     [SerializeField] private string m_primaryLabelFormat = "Mean: {0:0.###}";
     [SerializeField] private string m_secondaryLabelFormat = "LogVar: {0:0.###}";
     [SerializeField] private bool m_useStdDevForSecondary;
+    [SerializeField] private string m_tertiaryLabelFormat = "Brightness: {0:0.###}";
+    [SerializeField] private string m_tertiaryLabelMissingText = "Brightness: N/A";
 
     [SerializeField] private List<TileBinding> m_tiles = new List<TileBinding>();
 
@@ -178,6 +182,18 @@ public sealed class PredictionBatchThumbnailApplier : MonoBehaviour
                 : sample.LogVariance;
             binding.SecondaryLabel.text = string.Format(m_secondaryLabelFormat, secondaryValue);
         }
+
+        if (binding.TertiaryLabel != null)
+        {
+            if (sample.Brightness <= PredictionBatchCollector.BrightnessSentinel)
+            {
+                binding.TertiaryLabel.text = m_tertiaryLabelMissingText;
+            }
+            else
+            {
+                binding.TertiaryLabel.text = string.Format(m_tertiaryLabelFormat, sample.Brightness);
+            }
+        }
     }
 
     private void ClearTile(TileBinding binding)
@@ -195,6 +211,11 @@ public sealed class PredictionBatchThumbnailApplier : MonoBehaviour
         if (binding.SecondaryLabel != null)
         {
             binding.SecondaryLabel.text = string.Empty;
+        }
+
+        if (binding.TertiaryLabel != null)
+        {
+            binding.TertiaryLabel.text = string.Empty;
         }
 
         ClearThumbnail(binding);
@@ -256,6 +277,7 @@ public sealed class PredictionBatchThumbnailApplier : MonoBehaviour
         var labelRoot = elements != null ? elements : root;
         var labelTransform = FindChildByName(labelRoot, m_labelName);
         var secondaryTransform = FindChildByName(labelRoot, m_labelSecondaryName);
+        var tertiaryTransform = FindChildByName(labelRoot, m_labelTertiaryName);
         if (labelTransform != null)
         {
             binding.Label = labelTransform.GetComponent<TMP_Text>();
@@ -264,6 +286,11 @@ public sealed class PredictionBatchThumbnailApplier : MonoBehaviour
         if (secondaryTransform != null)
         {
             binding.SecondaryLabel = secondaryTransform.GetComponent<TMP_Text>();
+        }
+
+        if (tertiaryTransform != null)
+        {
+            binding.TertiaryLabel = tertiaryTransform.GetComponent<TMP_Text>();
         }
 
         return binding;

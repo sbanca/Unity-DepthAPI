@@ -6,6 +6,7 @@ using HandSelection = HandScore.HandSelection;
 
 public sealed class PredictionBatchCollector : MonoBehaviour
 {
+    public const float BrightnessSentinel = -1f;
 
     public readonly struct PredictionSample
     {
@@ -13,20 +14,27 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         public readonly float Mean;
         public readonly float LogVariance;
         public readonly float InferenceMs;
+        public readonly float Brightness;
         public readonly float Timestamp;
         public readonly string ImagePath;
 
         public PredictionSample(HandSelection hand, float mean, float logVariance, float inferenceMs, float timestamp)
-            : this(hand, mean, logVariance, inferenceMs, timestamp, null)
+            : this(hand, mean, logVariance, inferenceMs, timestamp, BrightnessSentinel, null)
         {
         }
 
-        public PredictionSample(HandSelection hand, float mean, float logVariance, float inferenceMs, float timestamp, string imagePath)
+        public PredictionSample(HandSelection hand, float mean, float logVariance, float inferenceMs, float timestamp, float brightness)
+            : this(hand, mean, logVariance, inferenceMs, timestamp, brightness, null)
+        {
+        }
+
+        public PredictionSample(HandSelection hand, float mean, float logVariance, float inferenceMs, float timestamp, float brightness, string imagePath)
         {
             Hand = hand;
             Mean = mean;
             LogVariance = logVariance;
             InferenceMs = inferenceMs;
+            Brightness = brightness;
             Timestamp = timestamp;
             ImagePath = imagePath;
         }
@@ -131,10 +139,15 @@ public sealed class PredictionBatchCollector : MonoBehaviour
 
     public bool AddSample(HandSelection hand, float mean, float logVariance, float inferenceMs)
     {
-        return AddSample(hand, mean, logVariance, inferenceMs, null);
+        return AddSample(hand, mean, logVariance, inferenceMs, BrightnessSentinel, null);
     }
 
-    public bool AddSample(HandSelection hand, float mean, float logVariance, float inferenceMs, byte[] imagePng)
+    public bool AddSample(HandSelection hand, float mean, float logVariance, float inferenceMs, float brightness)
+    {
+        return AddSample(hand, mean, logVariance, inferenceMs, brightness, null);
+    }
+
+    public bool AddSample(HandSelection hand, float mean, float logVariance, float inferenceMs, float brightness, byte[] imagePng)
     {
         if (!IsCollecting)
         {
@@ -152,7 +165,7 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         }
 
         var imagePath = TrySaveImage(hand, imagePng);
-        m_samples.Add(new PredictionSample(hand, mean, logVariance, inferenceMs, Time.realtimeSinceStartup, imagePath));
+        m_samples.Add(new PredictionSample(hand, mean, logVariance, inferenceMs, Time.realtimeSinceStartup, brightness, imagePath));
         m_sampleImagePngs.Add(imagePng);
         if (hand == HandSelection.Left)
         {
