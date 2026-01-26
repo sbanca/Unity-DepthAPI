@@ -46,8 +46,8 @@ public sealed class PredictionBatchSaver : MonoBehaviour
 
         var folder = string.IsNullOrWhiteSpace(m_folder) ? "PredictionBatch" : m_folder;
         var prefix = string.IsNullOrWhiteSpace(m_batchPrefix) ? "batch_" : m_batchPrefix;
-        var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss_fff", CultureInfo.InvariantCulture);
-        var root = Path.Combine(Application.persistentDataPath, folder, $"{prefix}{timestamp}");
+        var batchId = string.IsNullOrWhiteSpace(batch.BatchId) ? "unknown" : batch.BatchId;
+        var root = Path.Combine(Application.persistentDataPath, folder, $"{prefix}{batchId}");
         Directory.CreateDirectory(root);
 
         var fileName = string.IsNullOrWhiteSpace(m_fileName) ? "batch.csv" : m_fileName;
@@ -122,10 +122,16 @@ public sealed class PredictionBatchSaver : MonoBehaviour
             var sample = batch.Samples[i];
             var png = (batch.ImagePngs != null && i < batch.ImagePngs.Count) ? batch.ImagePngs[i] : null;
 
+            var fileName = $"{prefix}_{i:000}_{sample.Hand}.png";
+            var fullPath = Path.Combine(root, fileName);
+            if (File.Exists(fullPath))
+            {
+                paths[i] = fullPath;
+                continue;
+            }
+
             if (png != null && png.Length > 0)
             {
-                var fileName = $"{prefix}_{i:000}_{sample.Hand}.png";
-                var fullPath = Path.Combine(root, fileName);
                 try
                 {
                     File.WriteAllBytes(fullPath, png);
@@ -145,6 +151,11 @@ public sealed class PredictionBatchSaver : MonoBehaviour
                     ? $"{prefix}_{i:000}_{sample.Hand}.png"
                     : existingName;
                 var targetPath = Path.Combine(root, targetName);
+                if (File.Exists(targetPath))
+                {
+                    paths[i] = targetPath;
+                    continue;
+                }
                 try
                 {
                     File.Copy(sample.ImagePath, targetPath, true);

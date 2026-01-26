@@ -7,6 +7,8 @@ public sealed class PredictionBatchCollector : MonoBehaviour
 {
     public const float BrightnessSentinel = -1f;
 
+    private const int BatchIdLength = 8;
+
     public readonly struct PredictionSample
     {
         public readonly HandSelection Hand;
@@ -43,6 +45,8 @@ public sealed class PredictionBatchCollector : MonoBehaviour
     {
         public readonly IReadOnlyList<PredictionSample> Samples;
         public readonly IReadOnlyList<byte[]> ImagePngs;
+        public readonly string BatchId;
+        public readonly string BatchTimestamp;
         public readonly int LeftCount;
         public readonly int RightCount;
         public readonly int LeftTargetCount;
@@ -54,6 +58,8 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         public PredictionBatch(
             IReadOnlyList<PredictionSample> samples,
             IReadOnlyList<byte[]> imagePngs,
+            string batchId,
+            string batchTimestamp,
             int leftCount,
             int rightCount,
             int leftTargetCount,
@@ -62,6 +68,8 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         {
             Samples = samples;
             ImagePngs = imagePngs;
+            BatchId = batchId;
+            BatchTimestamp = batchTimestamp;
             LeftCount = leftCount;
             RightCount = rightCount;
             LeftTargetCount = leftTargetCount;
@@ -87,6 +95,8 @@ public sealed class PredictionBatchCollector : MonoBehaviour
     public int RightCount { get; private set; }
     public bool IsCollecting { get; private set; }
     public bool SavePredictionImages => m_savePredictionImages;
+    public string BatchId { get; private set; }
+    public string BatchTimestamp { get; private set; }
     public event Action<PredictionBatch> BatchReady;
     public bool HasLastBatch => m_batchReadyRaised;
 
@@ -112,6 +122,8 @@ public sealed class PredictionBatchCollector : MonoBehaviour
     {
         m_samples.Clear();
         m_sampleImagePngs.Clear();
+        BatchId = GenerateBatchId();
+        BatchTimestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss_fff", System.Globalization.CultureInfo.InvariantCulture);
         TargetCount = 0;
         LeftTargetCount = 0;
         RightTargetCount = 0;
@@ -208,6 +220,8 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         BatchReady?.Invoke(new PredictionBatch(
             m_samples,
             m_sampleImagePngs,
+            BatchId,
+            BatchTimestamp,
             LeftCount,
             RightCount,
             LeftTargetCount,
@@ -226,11 +240,19 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         batch = new PredictionBatch(
             m_samples,
             m_sampleImagePngs,
+            BatchId,
+            BatchTimestamp,
             LeftCount,
             RightCount,
             LeftTargetCount,
             RightTargetCount,
             TargetCount);
         return true;
+    }
+
+    private static string GenerateBatchId()
+    {
+        var guid = Guid.NewGuid().ToString("N");
+        return guid.Substring(0, BatchIdLength);
     }
 }
