@@ -10,6 +10,10 @@ public sealed class PredictionBatchSaver : MonoBehaviour
     [SerializeField] private PredictionBatchCollector m_collector;
     [SerializeField] private bool m_autoFindCollector = true;
 
+    [Header("Age")]
+    [SerializeField] private AgeInputManager m_ageInput;
+    [SerializeField] private bool m_autoFindAgeInput = true;
+
     [Header("Output")]
     [SerializeField] private string m_folder = "PredictionBatch";
     [SerializeField] private string m_batchPrefix = "batch_";
@@ -54,10 +58,11 @@ public sealed class PredictionBatchSaver : MonoBehaviour
         var sb = new StringBuilder(256 + batch.Count * 128);
         if (m_includeHeader)
         {
-            sb.AppendLine("index,hand,mean,logVariance,inferenceMs,brightness,timestamp,imagePath");
+            sb.AppendLine("index,hand,mean,logVariance,inferenceMs,brightness,timestamp,age,imagePath");
         }
 
         var inv = CultureInfo.InvariantCulture;
+        var ageValue = TryResolveAgeInput() ? m_ageInput.age.ToString(inv) : string.Empty;
         for (var i = 0; i < batch.Count; i++)
         {
             var sample = batch.Samples[i];
@@ -68,6 +73,7 @@ public sealed class PredictionBatchSaver : MonoBehaviour
             sb.Append(sample.InferenceMs.ToString("G9", inv)).Append(',');
             sb.Append(sample.Brightness.ToString("G9", inv)).Append(',');
             sb.Append(sample.Timestamp.ToString("G9", inv)).Append(',');
+            sb.Append(ageValue).Append(',');
             var imagePath = imagePaths != null && i < imagePaths.Length ? imagePaths[i] : sample.ImagePath;
             sb.Append(EscapeCsv(imagePath));
             sb.AppendLine();
@@ -89,6 +95,21 @@ public sealed class PredictionBatchSaver : MonoBehaviour
         }
 
         return m_collector != null;
+    }
+
+    private bool TryResolveAgeInput()
+    {
+        if (m_ageInput != null)
+        {
+            return true;
+        }
+
+        if (m_autoFindAgeInput)
+        {
+            m_ageInput = FindAnyObjectByType<AgeInputManager>();
+        }
+
+        return m_ageInput != null;
     }
 
     private string[] SaveImages(PredictionBatchCollector.PredictionBatch batch, string root)
