@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-public sealed class PredictionBatchCsvSaver : MonoBehaviour
+public sealed class PredictionBatchSaver : MonoBehaviour
 {
     [Header("Input")]
     [SerializeField] private PredictionBatchCollector m_collector;
@@ -18,28 +18,22 @@ public sealed class PredictionBatchCsvSaver : MonoBehaviour
     [SerializeField] private bool m_saveImages = true;
     [SerializeField] private string m_imagePrefix = "Prediction";
 
-    private void OnEnable()
+    public void SaveLatestBatch()
     {
-        if (m_collector == null && m_autoFindCollector)
+        if (!TryResolveCollector())
         {
-            m_collector = FindAnyObjectByType<PredictionBatchCollector>();
+            return;
         }
 
-        if (m_collector != null)
+        if (!m_collector.TryGetLastBatch(out var batch))
         {
-            m_collector.BatchReady += HandleBatchReady;
+            return;
         }
+
+        SaveBatch(batch);
     }
 
-    private void OnDisable()
-    {
-        if (m_collector != null)
-        {
-            m_collector.BatchReady -= HandleBatchReady;
-        }
-    }
-
-    private void HandleBatchReady(PredictionBatchCollector.PredictionBatch batch)
+    private void SaveBatch(PredictionBatchCollector.PredictionBatch batch)
     {
         if (batch.Samples == null || batch.Count == 0)
         {
@@ -80,6 +74,21 @@ public sealed class PredictionBatchCsvSaver : MonoBehaviour
         }
 
         File.WriteAllText(path, sb.ToString());
+    }
+
+    private bool TryResolveCollector()
+    {
+        if (m_collector != null)
+        {
+            return true;
+        }
+
+        if (m_autoFindCollector)
+        {
+            m_collector = FindAnyObjectByType<PredictionBatchCollector>();
+        }
+
+        return m_collector != null;
     }
 
     private string[] SaveImages(PredictionBatchCollector.PredictionBatch batch, string root)

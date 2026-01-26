@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using HandSelection = HandScore.HandSelection;
 
@@ -44,7 +43,6 @@ public sealed class PredictionBatchCollector : MonoBehaviour
     {
         public readonly IReadOnlyList<PredictionSample> Samples;
         public readonly IReadOnlyList<byte[]> ImagePngs;
-        public readonly string ImageDirectory;
         public readonly int LeftCount;
         public readonly int RightCount;
         public readonly int LeftTargetCount;
@@ -56,7 +54,6 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         public PredictionBatch(
             IReadOnlyList<PredictionSample> samples,
             IReadOnlyList<byte[]> imagePngs,
-            string imageDirectory,
             int leftCount,
             int rightCount,
             int leftTargetCount,
@@ -65,7 +62,6 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         {
             Samples = samples;
             ImagePngs = imagePngs;
-            ImageDirectory = imageDirectory;
             LeftCount = leftCount;
             RightCount = rightCount;
             LeftTargetCount = leftTargetCount;
@@ -76,13 +72,9 @@ public sealed class PredictionBatchCollector : MonoBehaviour
 
     [Header("Images")]
     [SerializeField] private bool m_savePredictionImages;
-    [SerializeField] private string m_imageFolder = "PredictionBatch";
-    [SerializeField] private string m_imagePrefix = "Prediction";
 
     private readonly List<PredictionSample> m_samples = new List<PredictionSample>();
     private readonly List<byte[]> m_sampleImagePngs = new List<byte[]>();
-    private string m_currentImageDirectory;
-    private int m_imageIndex;
     private bool m_hasBegun;
     private bool m_batchReadyRaised;
 
@@ -95,7 +87,6 @@ public sealed class PredictionBatchCollector : MonoBehaviour
     public int RightCount { get; private set; }
     public bool IsCollecting { get; private set; }
     public bool SavePredictionImages => m_savePredictionImages;
-    public string ImageDirectory => m_currentImageDirectory;
     public event Action<PredictionBatch> BatchReady;
     public bool HasLastBatch => m_batchReadyRaised;
 
@@ -115,10 +106,6 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         IsCollecting = TargetCount > 0;
         m_hasBegun = IsCollecting;
         m_batchReadyRaised = false;
-        if (IsCollecting)
-        {
-            PrepareImageOutputDirectory();
-        }
     }
 
     public void Clear()
@@ -131,8 +118,6 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         LeftCount = 0;
         RightCount = 0;
         IsCollecting = false;
-        m_currentImageDirectory = null;
-        m_imageIndex = 0;
         m_hasBegun = false;
         m_batchReadyRaised = false;
     }
@@ -164,8 +149,7 @@ public sealed class PredictionBatchCollector : MonoBehaviour
             return false;
         }
 
-        var imagePath = TrySaveImage(hand, imagePng);
-        m_samples.Add(new PredictionSample(hand, mean, logVariance, inferenceMs, Time.realtimeSinceStartup, brightness, imagePath));
+        m_samples.Add(new PredictionSample(hand, mean, logVariance, inferenceMs, Time.realtimeSinceStartup, brightness, null));
         m_sampleImagePngs.Add(imagePng);
         if (hand == HandSelection.Left)
         {
@@ -224,7 +208,6 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         BatchReady?.Invoke(new PredictionBatch(
             m_samples,
             m_sampleImagePngs,
-            m_currentImageDirectory,
             LeftCount,
             RightCount,
             LeftTargetCount,
@@ -243,62 +226,11 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         batch = new PredictionBatch(
             m_samples,
             m_sampleImagePngs,
-            m_currentImageDirectory,
             LeftCount,
             RightCount,
             LeftTargetCount,
             RightTargetCount,
             TargetCount);
         return true;
-    }
-
-    private void PrepareImageOutputDirectory()
-    {
-        if (!m_savePredictionImages)
-        {
-            m_currentImageDirectory = null;
-            return;
-        }
-
-        var folder = string.IsNullOrWhiteSpace(m_imageFolder) ? "PredictionBatch" : m_imageFolder;
-        var batchName = $"Batch_{DateTime.UtcNow:yyyyMMdd_HHmmss_fff}";
-        m_currentImageDirectory = Path.Combine(Application.persistentDataPath, folder, batchName);
-        Directory.CreateDirectory(m_currentImageDirectory);
-        m_imageIndex = 0;
-    }
-
-    private string TrySaveImage(HandSelection hand, byte[] imagePng)
-    {
-        if (!m_savePredictionImages || imagePng == null || imagePng.Length == 0)
-        {
-            return null;
-        }
-
-        if (string.IsNullOrWhiteSpace(m_currentImageDirectory))
-        {
-            PrepareImageOutputDirectory();
-        }
-
-        if (string.IsNullOrWhiteSpace(m_currentImageDirectory))
-        {
-            return null;
-        }
-
-        Directory.CreateDirectory(m_currentImageDirectory);
-        var prefix = string.IsNullOrWhiteSpace(m_imagePrefix) ? "Prediction" : m_imagePrefix;
-        var filename = $"{prefix}_{m_imageIndex:000}_{hand}.png";
-        var fullPath = Path.Combine(m_currentImageDirectory, filename);
-
-        try
-        {
-            File.WriteAllBytes(fullPath, imagePng);
-            m_imageIndex++;
-            return fullPath;
-        }
-        catch (Exception ex)
-        {
-            Debug.LogWarning($"PredictionBatchCollector: Failed to save image to {fullPath}. {ex.Message}");
-            return null;
-        }
     }
 }

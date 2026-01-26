@@ -21858,8 +21858,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_savePredictionImages: 1
-  m_imageFolder: PredictionBatch
-  m_imagePrefix: Prediction
 --- !u!114 &6450325907155778070
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21966,6 +21964,18 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: SetActive
         m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 6450325907155778077}
+        m_TargetAssemblyTypeName: PredictionBatchSaver, Assembly-CSharp
+        m_MethodName: SaveLatestBatch
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -22173,13 +22183,15 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c9a6d845527d46b8b10a534d791188a1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PredictionBatchCsvSaver
+  m_EditorClassIdentifier: Assembly-CSharp::PredictionBatchSaver
   m_collector: {fileID: 6450325907155778069}
   m_autoFindCollector: 1
   m_folder: PredictionBatch
   m_batchPrefix: batch_
   m_fileName: batch.csv
   m_includeHeader: 1
+  m_saveImages: 1
+  m_imagePrefix: Prediction
 --- !u!1001 &6886293773963461330
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -24841,22 +24853,22 @@ PrefabInstance:
     - target: {fileID: 3005434034049972275, guid: 7224fe8116eb42c45bafbd481ae0c535,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3005434034049972275, guid: 7224fe8116eb42c45bafbd481ae0c535,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3005434034049972275, guid: 7224fe8116eb42c45bafbd481ae0c535,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 154
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3005434034049972275, guid: 7224fe8116eb42c45bafbd481ae0c535,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -12
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3270696324367614547, guid: 7224fe8116eb42c45bafbd481ae0c535,
         type: 3}
@@ -25436,22 +25448,22 @@ PrefabInstance:
     - target: {fileID: 8858810582245623544, guid: 7224fe8116eb42c45bafbd481ae0c535,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8858810582245623544, guid: 7224fe8116eb42c45bafbd481ae0c535,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8858810582245623544, guid: 7224fe8116eb42c45bafbd481ae0c535,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 20
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8858810582245623544, guid: 7224fe8116eb42c45bafbd481ae0c535,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -15
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1618344967612300968, guid: 7224fe8116eb42c45bafbd481ae0c535, type: 3}
