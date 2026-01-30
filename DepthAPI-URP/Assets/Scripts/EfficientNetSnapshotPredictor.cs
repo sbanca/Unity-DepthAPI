@@ -19,6 +19,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     public float LastLogVariance { get; private set; }
     public float LastInferenceMs { get; private set; }
     public float LastBrightness { get; private set; }
+    public float LastMaskCoverage { get; private set; }
     public bool HasResult { get; private set; }
     public bool IsCapturing => m_isCapturing;
     public int ResultVersion { get; private set; }
@@ -41,6 +42,9 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     [Header("Brightness")]
     [SerializeField, Range(0f, 1f)] private float m_minBrightness;
 
+    [Header("Mask Filters")]
+    [SerializeField, Range(0f, 1f)] private float m_minMaskCoverage;
+
     [Header("Landmark Overlay")]
     [SerializeField] private bool m_overlayLandmarks;
     [SerializeField] private MaskLandmarkRunner m_landmarkRunner;
@@ -58,6 +62,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     private byte[] m_lastInputPng;
     private int m_lastInputVersion;
     private const float BrightnessSentinel = -1f;
+    private const float MaskCoverageSentinel = -1f;
 
     public void CaptureAndPredict()
     {
@@ -75,6 +80,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
         m_lastInputPng = null;
         m_lastInputVersion = 0;
         LastBrightness = BrightnessSentinel;
+        LastMaskCoverage = MaskCoverageSentinel;
         RenderTexture inputTexture = null;
         RenderTexture maskTexture = null;
         RenderTexture maskedInputTexture = null;
@@ -190,6 +196,23 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
             {
                 Debug.LogWarning($"EfficientNetSnapshotPredictor: Brightness {LastBrightness:0.###} below threshold {m_minBrightness:0.###}, skipping inference.");
                 yield break;
+            }
+
+            if (m_minMaskCoverage > 0f)
+            {
+                if (!m_useBinaryMask || maskTexture == null)
+                {
+                    Debug.LogWarning("EfficientNetSnapshotPredictor: Mask coverage threshold set but binary mask is disabled or missing.");
+                }
+                else
+                {
+                    LastMaskCoverage = ComputeMaskCoverage(maskTexture, m_maskThreshold);
+                    if (LastMaskCoverage <= MaskCoverageSentinel || LastMaskCoverage < m_minMaskCoverage)
+                    {
+                        Debug.LogWarning($"EfficientNetSnapshotPredictor: Mask coverage {LastMaskCoverage:0.###} below threshold {m_minMaskCoverage:0.###}, skipping inference.");
+                        yield break;
+                    }
+                }
             }
 
             var debugTextureSource = finalInputTexture;
@@ -463,6 +486,40 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
         finally
         {
             Destroy(colorTex);
+            Destroy(maskTex);
+        }
+    }
+
+    private float ComputeMaskCoverage(RenderTexture maskTexture, float threshold)
+    {
+        if (maskTexture == null)
+        {
+            return MaskCoverageSentinel;
+        }
+
+        var maskTex = ReadbackTexture(maskTexture, TextureFormat.RGBA32, true);
+        try
+        {
+            var masks = maskTex.GetPixels32();
+            if (masks == null || masks.Length == 0)
+            {
+                return MaskCoverageSentinel;
+            }
+
+            var thresholdByte = (byte)Mathf.Clamp(Mathf.RoundToInt(threshold * 255f), 0, 255);
+            var valid = 0;
+            for (var i = 0; i < masks.Length; i++)
+            {
+                if (masks[i].r >= thresholdByte)
+                {
+                    valid++;
+                }
+            }
+
+            return (float)valid / masks.Length;
+        }
+        finally
+        {
             Destroy(maskTex);
         }
     }
