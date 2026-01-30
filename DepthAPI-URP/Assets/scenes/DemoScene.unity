@@ -37215,6 +37215,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3217907455101476305, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3217907455101476305, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
       propertyPath: m_modelAsset
       value: 
       objectReference: {fileID: 5022602860645237092, guid: 1de20b2a15a01d040b7233f482c8a11b,
@@ -37229,6 +37234,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      propertyPath: modelRunner
+      value: 
+      objectReference: {fileID: 6450325907155778078}
     - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
       propertyPath: m_resultText
@@ -37263,6 +37273,10 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3657254597569055560, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      insertIndex: 2
+      addedObject: {fileID: 6450325907155778078}
     - targetCorrespondingSourceObject: {fileID: 3657254597569055560, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
       insertIndex: -1
@@ -37645,6 +37659,23 @@ MonoBehaviour:
   m_includeHeader: 1
   m_saveImages: 1
   m_imagePrefix: Prediction
+--- !u!114 &6450325907155778078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373883862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 141bc7fe429fced4dad557e308e7a384, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EfficientNetV2SmallAgeRegressorRunner
+  m_modelAsset: {fileID: 5022602860645237092, guid: 05bce34d242aa354c9d5246539074dab,
+    type: 3}
+  m_backend: 256
+  m_variant: v2_s
+  m_overrideInputSize: 0
 --- !u!1 &6455968406049985119
 GameObject:
   m_ObjectHideFlags: 0
