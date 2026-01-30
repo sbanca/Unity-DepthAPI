@@ -24,6 +24,8 @@ public sealed class InferenceManager : MonoBehaviour
     [SerializeField, Min(0)] private int m_rightPredictionsPerBatch = 3;
     [SerializeField, Min(0f)] private float m_delayMs = 200f;
     [SerializeField, Min(0f)] private float m_predictionTimeoutMs = 2000f;
+    [SerializeField, Min(0)] private int m_maxAttemptsPerHand;
+    [SerializeField, Min(0f)] private float m_retryDelayMs = 200f;
     [SerializeField] private bool m_disableAfterBatch = true;
 
     [Header("Output")]
@@ -35,6 +37,7 @@ public sealed class InferenceManager : MonoBehaviour
     private bool m_isCollecting;
     private bool m_leftArmed = true;
     private bool m_rightArmed = true;
+    private bool m_lastCaptureSucceeded;
 
     private void Update()
     {
@@ -95,19 +98,20 @@ public sealed class InferenceManager : MonoBehaviour
         m_collector.Begin(m_leftPredictionsPerBatch, m_rightPredictionsPerBatch);
 
         var delaySeconds = Mathf.Max(0f, m_delayMs) * 0.001f;
+        var retryDelaySeconds = Mathf.Max(0f, m_retryDelayMs) * 0.001f;
 
         if (m_leftPredictionsPerBatch > 0)
         {
             m_handScore.SetHandSelection(HandScore.HandSelection.Left);
             yield return WaitForHandReady(HandScore.HandSelection.Left);
-            yield return CaptureHandBatch(HandScore.HandSelection.Left, m_leftPredictionsPerBatch, delaySeconds);
+            yield return CaptureHandBatch(HandScore.HandSelection.Left, m_leftPredictionsPerBatch, delaySeconds, retryDelaySeconds);
         }
 
         if (m_rightPredictionsPerBatch > 0)
         {
             m_handScore.SetHandSelection(HandScore.HandSelection.Right);
             yield return WaitForHandReady(HandScore.HandSelection.Right);
-            yield return CaptureHandBatch(HandScore.HandSelection.Right, m_rightPredictionsPerBatch, delaySeconds);
+            yield return CaptureHandBatch(HandScore.HandSelection.Right, m_rightPredictionsPerBatch, delaySeconds, retryDelaySeconds);
         }
 
         m_collector.Complete();
@@ -130,6 +134,7 @@ public sealed class InferenceManager : MonoBehaviour
             yield break;
         }
 
+        m_lastCaptureSucceeded = false;
         while (m_predictor.IsCapturing)
         {
             yield return null;
@@ -155,30 +160,48 @@ public sealed class InferenceManager : MonoBehaviour
             }
 
             m_collector.AddSample(hand, m_predictor.LastMean, m_predictor.LastLogVariance, m_predictor.LastInferenceMs, m_predictor.LastBrightness, inputPng);
+            m_lastCaptureSucceeded = true;
         }
     }
 
-    private IEnumerator CaptureHandBatch(HandScore.HandSelection hand, int count, float delaySeconds)
+    private IEnumerator CaptureHandBatch(HandScore.HandSelection hand, int count, float delaySeconds, float retryDelaySeconds)
     {
         if (count <= 0)
         {
             yield break;
         }
 
-        for (var i = 0; i < count; i++)
+        var consecutiveFailures = 0;
+        while (m_collector != null && m_collector.IsCollecting && GetHandCount(hand) < count)
         {
-            if (!m_collector.IsCollecting)
+            if (m_maxAttemptsPerHand > 0 && consecutiveFailures >= m_maxAttemptsPerHand)
             {
+                Debug.LogWarning($"InferenceManager: Max consecutive failed attempts reached for {hand} hand; batch may be incomplete.");
                 yield break;
             }
 
             yield return CaptureOnce(hand);
+            consecutiveFailures = m_lastCaptureSucceeded ? 0 : consecutiveFailures + 1;
 
-            if (i < count - 1 && delaySeconds > 0f)
+            if (m_collector == null || !m_collector.IsCollecting)
+            {
+                yield break;
+            }
+
+            if (m_lastCaptureSucceeded && delaySeconds > 0f)
             {
                 yield return new WaitForSeconds(delaySeconds);
             }
+            else if (!m_lastCaptureSucceeded && retryDelaySeconds > 0f)
+            {
+                yield return new WaitForSeconds(retryDelaySeconds);
+            }
         }
+    }
+
+    private int GetHandCount(HandScore.HandSelection hand)
+    {
+        return hand == HandScore.HandSelection.Left ? m_collector.LeftCount : m_collector.RightCount;
     }
 
     private IEnumerator WaitForHandReady(HandScore.HandSelection hand)
