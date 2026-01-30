@@ -37374,6 +37374,7 @@ MonoBehaviour:
   m_rightPredictionsPerBatch: 3
   m_delayMs: 200
   m_predictionTimeoutMs: 10000
+  m_maxAttemptsPerHand: 20
   m_disableAfterBatch: 1
   m_batchText: {fileID: 1885682313}
   m_batchTmpText: {fileID: 1471444705}
