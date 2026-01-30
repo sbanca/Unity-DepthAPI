@@ -38,6 +38,9 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     [SerializeField] private bool m_invertMask;
     [SerializeField] private Material m_maskMaterial;
 
+    [Header("Brightness")]
+    [SerializeField, Range(0f, 1f)] private float m_minBrightness;
+
     [Header("Debug")]
     [SerializeField] private Renderer m_debugRenderer;
     [SerializeField] private RawImage m_debugRawImage;
@@ -176,6 +179,11 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
             }
 
             LastBrightness = ComputeBrightness(inputTexture, maskTexture, m_useBinaryMask, m_maskThreshold);
+            if (m_minBrightness > 0f && (LastBrightness <= BrightnessSentinel || LastBrightness < m_minBrightness))
+            {
+                Debug.LogWarning($"EfficientNetSnapshotPredictor: Brightness {LastBrightness:0.###} below threshold {m_minBrightness:0.###}, skipping inference.");
+                yield break;
+            }
 
             UpdateDebugTexture(finalInputTexture, targetSize);
 
