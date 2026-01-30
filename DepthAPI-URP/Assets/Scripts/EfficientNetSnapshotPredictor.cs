@@ -10,8 +10,8 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     [Tooltip("Reference the WebCamTextureManager in your scene. If left null, the script will try to find one at runtime.")]
     public WebCamTextureManager webcamManager;
 
-    [Tooltip("Reference the EfficientNetAgeRegressorRunner in your scene. If left null, the script will try to find one at runtime.")]
-    public EfficientNetAgeRegressorRunner modelRunner;
+    [Tooltip("Reference a component that implements IAgeRegressorRunner in your scene. If left null, the script will try to find one at runtime.")]
+    public MonoBehaviour modelRunner;
 
     [Header("Output")]
     [SerializeField] private Text m_resultText;
@@ -73,25 +73,22 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
 
         try
         {
-            if (modelRunner == null)
-            {
-                modelRunner = FindAnyObjectByType<EfficientNetAgeRegressorRunner>();
-            }
+            var runner = ResolveModelRunner();
 
             if (webcamManager == null)
             {
                 webcamManager = FindAnyObjectByType<WebCamTextureManager>();
             }
 
-            if (modelRunner == null)
+            if (runner == null)
             {
-                Debug.LogWarning("EfficientNetSnapshotPredictor: EfficientNetAgeRegressorRunner is missing.");
+                Debug.LogWarning("EfficientNetSnapshotPredictor: IAgeRegressorRunner is missing.");
                 yield break;
             }
 
-            if (!modelRunner.IsReady)
+            if (!runner.IsReady)
             {
-                Debug.LogWarning("EfficientNetSnapshotPredictor: EfficientNetAgeRegressorRunner is not ready yet.");
+                Debug.LogWarning("EfficientNetSnapshotPredictor: IAgeRegressorRunner is not ready yet.");
                 yield break;
             }
 
@@ -126,7 +123,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
                 Debug.LogWarning("EfficientNetSnapshotPredictor: WebCamTexture did not update this frame; capture may be stale.");
             }
 
-            var targetSize = modelRunner.InputSize;
+            var targetSize = runner.InputSize;
             if (targetSize.x <= 0 || targetSize.y <= 0)
             {
                 Debug.LogWarning("EfficientNetSnapshotPredictor: Model input size is not ready.");
@@ -182,7 +179,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
 
             UpdateDebugTexture(finalInputTexture, targetSize);
 
-            if (modelRunner.TryPredict(finalInputTexture, out var mean, out var logVar, out var inferenceMs))
+            if (runner.TryPredict(finalInputTexture, out var mean, out var logVar, out var inferenceMs))
             {
                 LastMean = mean;
                 LastLogVariance = logVar;
@@ -437,6 +434,37 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
             Destroy(colorTex);
             Destroy(maskTex);
         }
+    }
+
+    private IAgeRegressorRunner ResolveModelRunner()
+    {
+        if (modelRunner != null)
+        {
+            var runner = modelRunner as IAgeRegressorRunner;
+            if (runner == null)
+            {
+                Debug.LogWarning("EfficientNetSnapshotPredictor: Assigned modelRunner does not implement IAgeRegressorRunner.");
+                return FindAnyModelRunner();
+            }
+            return runner;
+        }
+
+        return FindAnyModelRunner();
+    }
+
+    private IAgeRegressorRunner FindAnyModelRunner()
+    {
+        var behaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+        for (var i = 0; i < behaviours.Length; i++)
+        {
+            if (behaviours[i] is IAgeRegressorRunner candidate)
+            {
+                modelRunner = behaviours[i];
+                return candidate;
+            }
+        }
+
+        return null;
     }
 
     private static float ComputeAverageLuminance(RenderTexture source)

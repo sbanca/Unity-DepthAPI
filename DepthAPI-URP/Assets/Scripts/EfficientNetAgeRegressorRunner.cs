@@ -6,7 +6,7 @@ using Unity.InferenceEngine;
 using UnityEngine;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
-public sealed class EfficientNetAgeRegressorRunner : MonoBehaviour
+public sealed class EfficientNetAgeRegressorRunner : MonoBehaviour, IAgeRegressorRunner
 {
     [Header("Model")]
     [SerializeField] private ModelAsset m_modelAsset;
