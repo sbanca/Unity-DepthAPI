@@ -8434,18 +8434,9 @@ MonoBehaviour:
   m_onAgeChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6450325907155778077}
-        m_TargetAssemblyTypeName: PredictionBatchSaver, Assembly-CSharp
-        m_MethodName: SaveLatestBatch
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      - {m_Target: {fileID: 6450325907155778077}, m_TargetAssemblyTypeName: PredictionBatchSaver, Assembly-CSharp, m_MethodName: SaveLatestBatch, m_Mode: 1, m_Arguments: {m_ObjectArgument: {fileID: 0},
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine, m_IntArgument: 0,
+          m_FloatArgument: 0, m_StringArgument: , m_BoolArgument: 0}, m_CallState: 2}
 --- !u!1 &638425052
 GameObject:
   m_ObjectHideFlags: 0
@@ -37236,6 +37227,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
+      propertyPath: m_leftHand
+      value: 
+      objectReference: {fileID: 2168491157491997239}
+    - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      propertyPath: m_rightHand
+      value: 
+      objectReference: {fileID: 2622204612434284431}
+    - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
       propertyPath: modelRunner
       value: 
       objectReference: {fileID: 6450325907155778079}
@@ -37271,9 +37272,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
+      propertyPath: m_landmarkRunner
+      value: 
+      objectReference: {fileID: 6450325907155778081}
+    - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
       propertyPath: m_depthMaskSource
       value: 
       objectReference: {fileID: 3709801807292519150}
+    - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      propertyPath: m_overlayLandmarks
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8944081038514860796, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      propertyPath: m_overlayHandJoints
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -37281,6 +37297,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3657254597569055560, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
       insertIndex: 2
+      addedObject: {fileID: 6450325907155778081}
+    - targetCorrespondingSourceObject: {fileID: 3657254597569055560, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      insertIndex: 3
       addedObject: {fileID: 6450325907155778078}
     - targetCorrespondingSourceObject: {fileID: 3657254597569055560, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
@@ -37693,6 +37713,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7a403b385ba4de1915816a144dee082, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6450325907155778081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373883862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44a9b2b4267444c45beca8611fee0f7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MaskLandmarkRunner
+  m_modelAsset: {fileID: 5022602860645237092, guid: 057ca4980eb07ca44b3d160c6f35b650,
+    type: 3}
+  m_backend: 256
+  m_overrideInputSize: 0
 --- !u!1 &6455968406049985119
 GameObject:
   m_ObjectHideFlags: 0

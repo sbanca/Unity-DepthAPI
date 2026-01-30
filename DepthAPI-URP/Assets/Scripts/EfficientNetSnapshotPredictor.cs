@@ -41,6 +41,12 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     [Header("Brightness")]
     [SerializeField, Range(0f, 1f)] private float m_minBrightness;
 
+    [Header("Landmark Overlay")]
+    [SerializeField] private bool m_overlayLandmarks;
+    [SerializeField] private MaskLandmarkRunner m_landmarkRunner;
+    [SerializeField, Range(1, 9)] private int m_landmarkPixelSize = 3;
+    [SerializeField] private Color m_landmarkColor = Color.red;
+
     [Header("Debug")]
     [SerializeField] private Renderer m_debugRenderer;
     [SerializeField] private RawImage m_debugRawImage;
@@ -72,6 +78,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
         RenderTexture inputTexture = null;
         RenderTexture maskTexture = null;
         RenderTexture maskedInputTexture = null;
+        RenderTexture overlayTexture = null;
         Texture2D maskTextureCpu = null;
 
         try
@@ -185,7 +192,18 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
                 yield break;
             }
 
-            UpdateDebugTexture(finalInputTexture, targetSize);
+            var debugTextureSource = finalInputTexture;
+            if (m_overlayLandmarks && m_landmarkRunner != null && maskTexture != null)
+            {
+                overlayTexture = RenderTexture.GetTemporary(targetSize.x, targetSize.y, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+                Graphics.Blit(finalInputTexture, overlayTexture);
+                if (TryOverlayLandmarks(overlayTexture, maskTexture, targetSize))
+                {
+                    debugTextureSource = overlayTexture;
+                }
+            }
+
+            UpdateDebugTexture(debugTextureSource, targetSize);
 
             if (runner.TryPredict(finalInputTexture, out var mean, out var logVar, out var inferenceMs))
             {
@@ -196,7 +214,7 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
                 ResultVersion++;
                 if (m_captureInputPng)
                 {
-                    m_lastInputPng = EncodeToPng(finalInputTexture);
+                    m_lastInputPng = EncodeToPng(debugTextureSource);
                     m_lastInputVersion = ResultVersion;
                 }
                 UpdateResultText();
@@ -217,6 +235,11 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
             if (maskedInputTexture != null)
             {
                 RenderTexture.ReleaseTemporary(maskedInputTexture);
+            }
+
+            if (overlayTexture != null)
+            {
+                RenderTexture.ReleaseTemporary(overlayTexture);
             }
 
             if (maskTextureCpu != null)
@@ -553,5 +576,78 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
         tex.Apply(false, false);
         RenderTexture.active = prev;
         return tex;
+    }
+
+    private bool TryOverlayLandmarks(RenderTexture target, Texture maskTexture, Vector2Int targetSize)
+    {
+        if (target == null || maskTexture == null || m_landmarkRunner == null)
+        {
+            return false;
+        }
+
+        if (!m_landmarkRunner.IsReady)
+        {
+            return false;
+        }
+
+        if (!m_landmarkRunner.TryPredict(maskTexture, out var landmarks, out _))
+        {
+            return false;
+        }
+
+        if (landmarks == null || landmarks.Length == 0)
+        {
+            return false;
+        }
+
+        var tex = ReadbackTexture(target, TextureFormat.RGBA32, false);
+        var drewAny = false;
+        try
+        {
+            var size = Mathf.Clamp(m_landmarkPixelSize, 1, 9);
+            var color = (Color32)m_landmarkColor;
+            for (var i = 0; i < landmarks.Length; i++)
+            {
+                var point = landmarks[i];
+                var targetPixel = new Vector2Int(Mathf.RoundToInt(point.x), Mathf.RoundToInt(point.y));
+                DrawSquare(tex, targetPixel, size, color, targetSize.y);
+                drewAny = true;
+            }
+
+            if (drewAny)
+            {
+                tex.Apply(false, false);
+                Graphics.Blit(tex, target);
+            }
+        }
+        finally
+        {
+            Destroy(tex);
+        }
+
+        return drewAny;
+    }
+
+    private static void DrawSquare(Texture2D tex, Vector2Int center, int size, Color32 color, int textureHeight)
+    {
+        if (tex == null || size <= 0)
+        {
+            return;
+        }
+
+        center.y = textureHeight - 1 - center.y;
+        var half = size / 2;
+        var xMin = Mathf.Clamp(center.x - half, 0, tex.width - 1);
+        var xMax = Mathf.Clamp(center.x + half, 0, tex.width - 1);
+        var yMin = Mathf.Clamp(center.y - half, 0, tex.height - 1);
+        var yMax = Mathf.Clamp(center.y + half, 0, tex.height - 1);
+
+        for (var y = yMin; y <= yMax; y++)
+        {
+            for (var x = xMin; x <= xMax; x++)
+            {
+                tex.SetPixel(x, y, color);
+            }
+        }
     }
 }
