@@ -37213,6 +37213,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3217907455101476305, guid: 2f320d8b4cfb476419a780ce145435aa,
+        type: 3}
+      propertyPath: m_modelAsset
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 1de20b2a15a01d040b7233f482c8a11b,
+        type: 3}
     - target: {fileID: 3657254597569055560, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
       propertyPath: m_Name
@@ -38153,6 +38159,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Commands
+      objectReference: {fileID: 0}
+    - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
+        type: 3}
+      propertyPath: bindings.Array.data[6].key
+      value: 38
       objectReference: {fileID: 0}
     - target: {fileID: 3098911231470705427, guid: 32790fc2cb51bc14b9f4f24c4f2bbd35,
         type: 3}
