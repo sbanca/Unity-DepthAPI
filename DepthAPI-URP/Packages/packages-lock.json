@@ -25,11 +25,10 @@
       "url": "https://packages.unity.com"
     },
     "com.meta.xr.sdk.core": {
-      "version": "83.0.1",
+      "version": "file:com.meta.xr.sdk.core",
       "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://packages.unity.com"
+      "source": "embedded",
+      "dependencies": {}
     },
     "com.meta.xr.sdk.interaction": {
       "version": "83.0.1",
