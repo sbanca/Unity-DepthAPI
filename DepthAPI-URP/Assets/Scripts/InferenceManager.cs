@@ -20,7 +20,6 @@ public sealed class InferenceManager : MonoBehaviour
     [SerializeField] private bool m_requireScoreDropToRetrigger = true;
 
     [Header("Batch")]
-    [SerializeField] private bool m_deferInference;
     [SerializeField, Min(0), FormerlySerializedAs("m_predictionsPerBatch")] private int m_leftPredictionsPerBatch = 3;
     [SerializeField, Min(0)] private int m_rightPredictionsPerBatch = 3;
     [SerializeField, Min(0f)] private float m_delayMs = 200f;
@@ -41,6 +40,7 @@ public sealed class InferenceManager : MonoBehaviour
     private bool m_rightArmed = true;
     private bool m_lastCaptureSucceeded;
     private readonly System.Collections.Generic.List<PendingSample> m_pendingSamples = new System.Collections.Generic.List<PendingSample>();
+    private const bool k_DeferInference = true;
 
     private struct PendingSample
     {
@@ -111,12 +111,12 @@ public sealed class InferenceManager : MonoBehaviour
         var previousDefer = m_predictor != null ? m_predictor.DeferInference : false;
         if (m_predictor != null)
         {
-            m_predictor.DeferInference = m_deferInference;
+            m_predictor.DeferInference = k_DeferInference;
         }
 
         if (m_collector != null)
         {
-            m_collector.DeferBatchReady = m_deferInference;
+            m_collector.DeferBatchReady = k_DeferInference;
             m_collector.Begin(m_leftPredictionsPerBatch, m_rightPredictionsPerBatch);
         }
 
@@ -139,7 +139,7 @@ public sealed class InferenceManager : MonoBehaviour
 
         m_onBatchCaptured?.Invoke();
 
-        if (m_deferInference && m_pendingSamples.Count > 0)
+        if (k_DeferInference && m_pendingSamples.Count > 0)
         {
             yield return RunDeferredInference();
         }
@@ -147,10 +147,6 @@ public sealed class InferenceManager : MonoBehaviour
         m_onBatchInferenceCompleted?.Invoke();
         m_collector.Complete();
         m_isCollecting = false;
-        if (m_predictor != null)
-        {
-            m_predictor.DeferInference = previousDefer;
-        }
 
         UpdateBatchText();
         InvokeBatchMeansEvent();
@@ -176,14 +172,7 @@ public sealed class InferenceManager : MonoBehaviour
 
         var startVersion = m_predictor.ResultVersion;
         var previousCapturePng = m_predictor.CaptureInputPng;
-        if (m_deferInference)
-        {
-            m_predictor.CaptureInputPng = true;
-        }
-        else
-        {
-            m_predictor.CaptureInputPng = m_collector.SavePredictionImages;
-        }
+        m_predictor.CaptureInputPng = true;
         m_predictor.CaptureAndPredict();
 
         var timeoutSeconds = Mathf.Max(0f, m_predictionTimeoutMs) * 0.001f;
@@ -201,27 +190,19 @@ public sealed class InferenceManager : MonoBehaviour
                 m_predictor.TryConsumeLastInputPng(m_predictor.ResultVersion, out inputPng);
             }
 
-            if (m_deferInference)
+            if (inputPng == null || inputPng.Length == 0)
             {
-                if (inputPng == null || inputPng.Length == 0)
-                {
-                    m_lastCaptureSucceeded = false;
-                }
-                else if (m_collector.AddSampleDeferred(hand, m_predictor.LastBrightness, inputPng, out var sampleIndex))
-                {
-                    m_pendingSamples.Add(new PendingSample
-                    {
-                        Hand = hand,
-                        Png = inputPng,
-                        Brightness = m_predictor.LastBrightness,
-                        CollectorIndex = sampleIndex
-                    });
-                    m_lastCaptureSucceeded = true;
-                }
+                m_lastCaptureSucceeded = false;
             }
-            else if (m_predictor.HasResult)
+            else if (m_collector.AddSampleDeferred(hand, m_predictor.LastBrightness, inputPng, out var sampleIndex))
             {
-                m_collector.AddSample(hand, m_predictor.LastMean, m_predictor.LastLogVariance, m_predictor.LastInferenceMs, m_predictor.LastBrightness, inputPng);
+                m_pendingSamples.Add(new PendingSample
+                {
+                    Hand = hand,
+                    Png = inputPng,
+                    Brightness = m_predictor.LastBrightness,
+                    CollectorIndex = sampleIndex
+                });
                 m_lastCaptureSucceeded = true;
             }
         }
