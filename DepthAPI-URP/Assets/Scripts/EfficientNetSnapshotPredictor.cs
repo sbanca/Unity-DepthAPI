@@ -17,13 +17,6 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     public MonoBehaviour[] modelRunners;
     [SerializeField, Tooltip("Index of the modelRunners array to use for predictions.")]
     private int m_activeRunnerIndex;
-    [SerializeField, HideInInspector] private bool m_deferInference;
-
-    public bool DeferInference
-    {
-        get => m_deferInference;
-        set => m_deferInference = value;
-    }
 
     public int ActiveRunnerIndex
     {
@@ -248,33 +241,16 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
 
             UpdateDebugTexture(debugTextureSource, targetSize);
 
-            if (m_deferInference)
+            // Always capture only; inference is executed later by a different caller.
+            HasResult = false;
+            LastMean = 0f;
+            LastLogVariance = 0f;
+            LastInferenceMs = -1f;
+            ResultVersion++;
+            if (m_captureInputPng)
             {
-                // Capture only; inference will be run later by a different caller.
-                HasResult = false;
-                LastMean = 0f;
-                LastLogVariance = 0f;
-                LastInferenceMs = -1f;
-                ResultVersion++;
-                if (m_captureInputPng)
-                {
-                    m_lastInputPng = EncodeToPng(debugTextureSource);
-                    m_lastInputVersion = ResultVersion;
-                }
-            }
-            else if (runner.TryPredict(finalInputTexture, out var mean, out var logVar, out var inferenceMs))
-            {
-                LastMean = mean;
-                LastLogVariance = logVar;
-                LastInferenceMs = inferenceMs;
-                HasResult = true;
-                ResultVersion++;
-                if (m_captureInputPng)
-                {
-                    m_lastInputPng = EncodeToPng(debugTextureSource);
-                    m_lastInputVersion = ResultVersion;
-                }
-                UpdateResultText();
+                m_lastInputPng = EncodeToPng(debugTextureSource);
+                m_lastInputVersion = ResultVersion;
             }
         }
         finally

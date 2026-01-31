@@ -18,6 +18,7 @@ public sealed class AgeGate : MonoBehaviour
     [Header("Events")]
     [SerializeField] private UnityEvent m_onAdmitted;
     [SerializeField] private UnityEvent m_onRejected;
+    [SerializeField] private UnityEvent m_onReset;
 
     [Header("Output")]
     [SerializeField] private TMP_Text m_statusTmpText;
@@ -112,5 +113,17 @@ public sealed class AgeGate : MonoBehaviour
             $"Adult probability: {pAdultText}\n" +
             $"Decision threshold (tau): {m_tau:0.###}\n" +
             $"Adult age threshold: {m_ageThreshold:0.###}";
+    }
+
+    /// <summary>
+    /// Clears the latest decision/probability and updates UI, then fires the reset event.
+    /// </summary>
+    public void ResetGate()
+    {
+        LastPAdult = 0f;
+        LastAdmitted = false;
+        HasResult = false;
+        UpdateStatusText();
+        m_onReset?.Invoke();
     }
 }

@@ -40,7 +40,6 @@ public sealed class InferenceManager : MonoBehaviour
     private bool m_rightArmed = true;
     private bool m_lastCaptureSucceeded;
     private readonly System.Collections.Generic.List<PendingSample> m_pendingSamples = new System.Collections.Generic.List<PendingSample>();
-    private const bool k_DeferInference = true;
 
     private struct PendingSample
     {
@@ -108,15 +107,9 @@ public sealed class InferenceManager : MonoBehaviour
         m_isCollecting = true;
         m_pendingSamples.Clear();
 
-        var previousDefer = m_predictor != null ? m_predictor.DeferInference : false;
-        if (m_predictor != null)
-        {
-            m_predictor.DeferInference = k_DeferInference;
-        }
-
         if (m_collector != null)
         {
-            m_collector.DeferBatchReady = k_DeferInference;
+            m_collector.DeferBatchReady = true;
             m_collector.Begin(m_leftPredictionsPerBatch, m_rightPredictionsPerBatch);
         }
 
@@ -139,7 +132,7 @@ public sealed class InferenceManager : MonoBehaviour
 
         m_onBatchCaptured?.Invoke();
 
-        if (k_DeferInference && m_pendingSamples.Count > 0)
+        if (m_pendingSamples.Count > 0)
         {
             yield return RunDeferredInference();
         }
