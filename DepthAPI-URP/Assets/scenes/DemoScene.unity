@@ -63065,7 +63065,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 141bc7fe429fced4dad557e308e7a384, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EfficientNetV2SmallAgeRegressorRunner
-  m_modelAsset: {fileID: 5022602860645237092, guid: 1de20b2a15a01d040b7233f482c8a11b,
+  m_modelAsset: {fileID: 5022602860645237092, guid: 05bce34d242aa354c9d5246539074dab,
     type: 3}
   m_backend: 256
   m_variant: v2_s
