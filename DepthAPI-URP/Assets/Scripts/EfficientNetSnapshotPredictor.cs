@@ -17,6 +17,14 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     public MonoBehaviour[] modelRunners;
     [SerializeField, Tooltip("Index of the modelRunners array to use for predictions.")]
     private int m_activeRunnerIndex;
+    [SerializeField, HideInInspector] private bool m_deferInference;
+
+    public bool DeferInference
+    {
+        get => m_deferInference;
+        set => m_deferInference = value;
+    }
+
     public int ActiveRunnerIndex
     {
         get => m_activeRunnerIndex;
@@ -240,7 +248,21 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
 
             UpdateDebugTexture(debugTextureSource, targetSize);
 
-            if (runner.TryPredict(finalInputTexture, out var mean, out var logVar, out var inferenceMs))
+            if (m_deferInference)
+            {
+                // Capture only; inference will be run later by a different caller.
+                HasResult = false;
+                LastMean = 0f;
+                LastLogVariance = 0f;
+                LastInferenceMs = -1f;
+                ResultVersion++;
+                if (m_captureInputPng)
+                {
+                    m_lastInputPng = EncodeToPng(debugTextureSource);
+                    m_lastInputVersion = ResultVersion;
+                }
+            }
+            else if (runner.TryPredict(finalInputTexture, out var mean, out var logVar, out var inferenceMs))
             {
                 LastMean = mean;
                 LastLogVariance = logVar;
@@ -540,6 +562,28 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     {
         var runner = ResolveAssignedRunner();
         return runner ?? FindAnyModelRunner();
+    }
+
+    public bool TryPredictTexture(Texture input, out float mean, out float logVariance, out float inferenceMs)
+    {
+        mean = 0f;
+        logVariance = 0f;
+        inferenceMs = -1f;
+
+        var runner = ResolveModelRunner();
+        if (runner == null)
+        {
+            Debug.LogWarning("EfficientNetSnapshotPredictor: No IAgeRegressorRunner available for deferred inference.");
+            return false;
+        }
+
+        if (!runner.IsReady)
+        {
+            Debug.LogWarning("EfficientNetSnapshotPredictor: IAgeRegressorRunner is not ready for deferred inference.");
+            return false;
+        }
+
+        return runner.TryPredict(input, out mean, out logVariance, out inferenceMs);
     }
 
     private IAgeRegressorRunner ResolveAssignedRunner()

@@ -20,6 +20,7 @@ public sealed class InferenceManager : MonoBehaviour
     [SerializeField] private bool m_requireScoreDropToRetrigger = true;
 
     [Header("Batch")]
+    [SerializeField] private bool m_deferInference;
     [SerializeField, Min(0), FormerlySerializedAs("m_predictionsPerBatch")] private int m_leftPredictionsPerBatch = 3;
     [SerializeField, Min(0)] private int m_rightPredictionsPerBatch = 3;
     [SerializeField, Min(0f)] private float m_delayMs = 200f;
@@ -32,12 +33,22 @@ public sealed class InferenceManager : MonoBehaviour
     [SerializeField] private Text m_batchText;
     [SerializeField] private TMP_Text m_batchTmpText;
     [SerializeField] private BatchMeansEvent m_onBatchMeansReady;
-    [SerializeField] private UnityEvent m_onBatchCompleted;
+    [SerializeField] private UnityEvent m_onBatchCaptured;
+    [SerializeField] private UnityEvent m_onBatchInferenceCompleted;
 
     private bool m_isCollecting;
     private bool m_leftArmed = true;
     private bool m_rightArmed = true;
     private bool m_lastCaptureSucceeded;
+    private readonly System.Collections.Generic.List<PendingSample> m_pendingSamples = new System.Collections.Generic.List<PendingSample>();
+
+    private struct PendingSample
+    {
+        public HandScore.HandSelection Hand;
+        public byte[] Png;
+        public float Brightness;
+        public int CollectorIndex;
+    }
 
     private void Update()
     {
@@ -95,7 +106,19 @@ public sealed class InferenceManager : MonoBehaviour
     private IEnumerator CollectBatch()
     {
         m_isCollecting = true;
-        m_collector.Begin(m_leftPredictionsPerBatch, m_rightPredictionsPerBatch);
+        m_pendingSamples.Clear();
+
+        var previousDefer = m_predictor != null ? m_predictor.DeferInference : false;
+        if (m_predictor != null)
+        {
+            m_predictor.DeferInference = m_deferInference;
+        }
+
+        if (m_collector != null)
+        {
+            m_collector.DeferBatchReady = m_deferInference;
+            m_collector.Begin(m_leftPredictionsPerBatch, m_rightPredictionsPerBatch);
+        }
 
         var delaySeconds = Mathf.Max(0f, m_delayMs) * 0.001f;
         var retryDelaySeconds = Mathf.Max(0f, m_retryDelayMs) * 0.001f;
@@ -114,12 +137,23 @@ public sealed class InferenceManager : MonoBehaviour
             yield return CaptureHandBatch(HandScore.HandSelection.Right, m_rightPredictionsPerBatch, delaySeconds, retryDelaySeconds);
         }
 
+        m_onBatchCaptured?.Invoke();
+
+        if (m_deferInference && m_pendingSamples.Count > 0)
+        {
+            yield return RunDeferredInference();
+        }
+
+        m_onBatchInferenceCompleted?.Invoke();
         m_collector.Complete();
         m_isCollecting = false;
+        if (m_predictor != null)
+        {
+            m_predictor.DeferInference = previousDefer;
+        }
 
         UpdateBatchText();
         InvokeBatchMeansEvent();
-        m_onBatchCompleted?.Invoke();
 
         if (m_disableAfterBatch)
         {
@@ -141,7 +175,15 @@ public sealed class InferenceManager : MonoBehaviour
         }
 
         var startVersion = m_predictor.ResultVersion;
-        m_predictor.CaptureInputPng = m_collector.SavePredictionImages;
+        var previousCapturePng = m_predictor.CaptureInputPng;
+        if (m_deferInference)
+        {
+            m_predictor.CaptureInputPng = true;
+        }
+        else
+        {
+            m_predictor.CaptureInputPng = m_collector.SavePredictionImages;
+        }
         m_predictor.CaptureAndPredict();
 
         var timeoutSeconds = Mathf.Max(0f, m_predictionTimeoutMs) * 0.001f;
@@ -151,17 +193,40 @@ public sealed class InferenceManager : MonoBehaviour
             yield return null;
         }
 
-        if (m_predictor.ResultVersion != startVersion && m_predictor.HasResult)
+        if (m_predictor.ResultVersion != startVersion)
         {
             byte[] inputPng = null;
-            if (m_collector.SavePredictionImages)
+            if (m_predictor.CaptureInputPng)
             {
                 m_predictor.TryConsumeLastInputPng(m_predictor.ResultVersion, out inputPng);
             }
 
-            m_collector.AddSample(hand, m_predictor.LastMean, m_predictor.LastLogVariance, m_predictor.LastInferenceMs, m_predictor.LastBrightness, inputPng);
-            m_lastCaptureSucceeded = true;
+            if (m_deferInference)
+            {
+                if (inputPng == null || inputPng.Length == 0)
+                {
+                    m_lastCaptureSucceeded = false;
+                }
+                else if (m_collector.AddSampleDeferred(hand, m_predictor.LastBrightness, inputPng, out var sampleIndex))
+                {
+                    m_pendingSamples.Add(new PendingSample
+                    {
+                        Hand = hand,
+                        Png = inputPng,
+                        Brightness = m_predictor.LastBrightness,
+                        CollectorIndex = sampleIndex
+                    });
+                    m_lastCaptureSucceeded = true;
+                }
+            }
+            else if (m_predictor.HasResult)
+            {
+                m_collector.AddSample(hand, m_predictor.LastMean, m_predictor.LastLogVariance, m_predictor.LastInferenceMs, m_predictor.LastBrightness, inputPng);
+                m_lastCaptureSucceeded = true;
+            }
         }
+
+        m_predictor.CaptureInputPng = previousCapturePng;
     }
 
     private IEnumerator CaptureHandBatch(HandScore.HandSelection hand, int count, float delaySeconds, float retryDelaySeconds)
@@ -197,6 +262,52 @@ public sealed class InferenceManager : MonoBehaviour
                 yield return new WaitForSeconds(retryDelaySeconds);
             }
         }
+    }
+
+    private IEnumerator RunDeferredInference()
+    {
+        if (m_predictor == null || m_collector == null || m_pendingSamples.Count == 0)
+        {
+            yield break;
+        }
+
+        for (var i = 0; i < m_pendingSamples.Count; i++)
+        {
+            var pending = m_pendingSamples[i];
+            if (pending.Png == null || pending.Png.Length == 0)
+            {
+                continue;
+            }
+
+            Texture2D tex = null;
+            try
+            {
+                tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                if (!tex.LoadImage(pending.Png, false))
+                {
+                    continue;
+                }
+
+                if (m_predictor.TryPredictTexture(tex, out var mean, out var logVar, out var inferenceMs))
+                {
+                    m_collector.UpdateSampleInference(pending.CollectorIndex, mean, logVar, inferenceMs);
+                }
+            }
+            finally
+            {
+                if (tex != null)
+                {
+                    Object.Destroy(tex);
+                }
+            }
+
+            // Yield to keep main thread responsive during post-batch processing.
+            yield return null;
+        }
+
+        m_pendingSamples.Clear();
+        m_collector.DeferBatchReady = false;
+        m_collector.ReleaseBatchReady();
     }
 
     private int GetHandCount(HandScore.HandSelection hand)

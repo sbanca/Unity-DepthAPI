@@ -9,27 +9,26 @@ public sealed class PredictionBatchCollector : MonoBehaviour
 
     private const int BatchIdLength = 8;
 
-    public readonly struct PredictionSample
+    public sealed class PredictionSample
     {
-        public readonly HandSelection Hand;
-        public readonly float Mean;
-        public readonly float LogVariance;
-        public readonly float InferenceMs;
-        public readonly float Brightness;
-        public readonly float Timestamp;
-        public readonly string ImagePath;
+        public HandSelection Hand { get; }
+        public float Mean { get; private set; }
+        public float LogVariance { get; private set; }
+        public float InferenceMs { get; private set; }
+        public float Brightness { get; }
+        public float Timestamp { get; }
+        public string ImagePath { get; }
+        public bool HasInference { get; private set; }
 
-        public PredictionSample(HandSelection hand, float mean, float logVariance, float inferenceMs, float timestamp)
-            : this(hand, mean, logVariance, inferenceMs, timestamp, BrightnessSentinel, null)
-        {
-        }
-
-        public PredictionSample(HandSelection hand, float mean, float logVariance, float inferenceMs, float timestamp, float brightness)
-            : this(hand, mean, logVariance, inferenceMs, timestamp, brightness, null)
-        {
-        }
-
-        public PredictionSample(HandSelection hand, float mean, float logVariance, float inferenceMs, float timestamp, float brightness, string imagePath)
+        public PredictionSample(
+            HandSelection hand,
+            float mean,
+            float logVariance,
+            float inferenceMs,
+            float timestamp,
+            float brightness = BrightnessSentinel,
+            string imagePath = null,
+            bool hasInference = true)
         {
             Hand = hand;
             Mean = mean;
@@ -38,6 +37,15 @@ public sealed class PredictionBatchCollector : MonoBehaviour
             Brightness = brightness;
             Timestamp = timestamp;
             ImagePath = imagePath;
+            HasInference = hasInference;
+        }
+
+        public void SetInference(float mean, float logVariance, float inferenceMs)
+        {
+            Mean = mean;
+            LogVariance = logVariance;
+            InferenceMs = inferenceMs;
+            HasInference = true;
         }
     }
 
@@ -85,6 +93,8 @@ public sealed class PredictionBatchCollector : MonoBehaviour
     private readonly List<byte[]> m_sampleImagePngs = new List<byte[]>();
     private bool m_hasBegun;
     private bool m_batchReadyRaised;
+    private bool m_deferBatchReady;
+    private bool m_pendingBatchReady;
 
     public IReadOnlyList<PredictionSample> Samples => m_samples;
     public IReadOnlyList<byte[]> ImagePngs => m_sampleImagePngs;
@@ -99,6 +109,11 @@ public sealed class PredictionBatchCollector : MonoBehaviour
     public string BatchTimestamp { get; private set; }
     public event Action<PredictionBatch> BatchReady;
     public bool HasLastBatch => m_batchReadyRaised;
+    public bool DeferBatchReady
+    {
+        get => m_deferBatchReady;
+        set => m_deferBatchReady = value;
+    }
 
     public int Count => m_samples.Count;
 
@@ -132,6 +147,7 @@ public sealed class PredictionBatchCollector : MonoBehaviour
         IsCollecting = false;
         m_hasBegun = false;
         m_batchReadyRaised = false;
+        m_pendingBatchReady = false;
     }
 
     public bool AddSample(HandSelection hand, float mean, float logVariance, float inferenceMs)
@@ -146,23 +162,49 @@ public sealed class PredictionBatchCollector : MonoBehaviour
 
     public bool AddSample(HandSelection hand, float mean, float logVariance, float inferenceMs, float brightness, byte[] imagePng)
     {
+        return AddSampleInternal(hand, mean, logVariance, inferenceMs, brightness, imagePng, true, out _);
+    }
+
+    public bool AddSampleDeferred(HandSelection hand, float brightness, byte[] imagePng, out int sampleIndex)
+    {
+        return AddSampleInternal(hand, 0f, 0f, 0f, brightness, imagePng, false, out sampleIndex);
+    }
+
+    public bool UpdateSampleInference(int index, float mean, float logVariance, float inferenceMs)
+    {
+        if (index < 0 || index >= m_samples.Count)
+        {
+            return false;
+        }
+
+        var sample = m_samples[index];
+        sample.SetInference(mean, logVariance, inferenceMs);
+        return true;
+    }
+
+    private bool AddSampleInternal(HandSelection hand, float mean, float logVariance, float inferenceMs, float brightness, byte[] imagePng, bool hasInference, out int sampleIndex)
+    {
         if (!IsCollecting)
         {
+            sampleIndex = -1;
             return false;
         }
 
         if (hand == HandSelection.Left && LeftCount >= LeftTargetCount)
         {
+            sampleIndex = -1;
             return false;
         }
 
         if (hand == HandSelection.Right && RightCount >= RightTargetCount)
         {
+            sampleIndex = -1;
             return false;
         }
 
-        m_samples.Add(new PredictionSample(hand, mean, logVariance, inferenceMs, Time.realtimeSinceStartup, brightness, null));
+        m_samples.Add(new PredictionSample(hand, mean, logVariance, inferenceMs, Time.realtimeSinceStartup, brightness, null, hasInference));
         m_sampleImagePngs.Add(imagePng);
+        sampleIndex = m_samples.Count - 1;
         if (hand == HandSelection.Left)
         {
             LeftCount++;
@@ -212,6 +254,31 @@ public sealed class PredictionBatchCollector : MonoBehaviour
     private void TryRaiseBatchReady()
     {
         if (!m_hasBegun || m_batchReadyRaised)
+        {
+            return;
+        }
+
+        if (m_deferBatchReady)
+        {
+            m_pendingBatchReady = true;
+            return;
+        }
+
+        RaiseBatchReadyNow();
+    }
+
+    public void ReleaseBatchReady()
+    {
+        if (m_pendingBatchReady && !m_batchReadyRaised)
+        {
+            m_pendingBatchReady = false;
+            RaiseBatchReadyNow();
+        }
+    }
+
+    private void RaiseBatchReadyNow()
+    {
+        if (m_batchReadyRaised)
         {
             return;
         }
