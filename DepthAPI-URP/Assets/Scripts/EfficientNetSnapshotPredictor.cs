@@ -4,14 +4,26 @@ using System.Collections;
 using PassthroughCameraSamples;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Serialization;
 
 public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
 {
     [Tooltip("Reference the WebCamTextureManager in your scene. If left null, the script will try to find one at runtime.")]
     public WebCamTextureManager webcamManager;
 
-    [Tooltip("Reference a component that implements IAgeRegressorRunner in your scene. If left null, the script will try to find one at runtime.")]
-    public MonoBehaviour modelRunner;
+    [Header("Model Runners")]
+    [Tooltip("Reference one or more components that implement IAgeRegressorRunner in your scene. If left empty, the script will try to find one at runtime.")]
+    [FormerlySerializedAs("modelRunner")]
+    public MonoBehaviour[] modelRunners;
+    [SerializeField, Tooltip("Index of the modelRunners array to use for predictions.")]
+    private int m_activeRunnerIndex;
+    public int ActiveRunnerIndex
+    {
+        get => m_activeRunnerIndex;
+        set => m_activeRunnerIndex = modelRunners == null || modelRunners.Length == 0
+            ? 0
+            : Mathf.Clamp(value, 0, modelRunners.Length - 1);
+    }
 
     [Header("Output")]
     [SerializeField] private Text m_resultText;
@@ -526,18 +538,37 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
 
     private IAgeRegressorRunner ResolveModelRunner()
     {
-        if (modelRunner != null)
+        var runner = ResolveAssignedRunner();
+        return runner ?? FindAnyModelRunner();
+    }
+
+    private IAgeRegressorRunner ResolveAssignedRunner()
+    {
+        if (modelRunners == null || modelRunners.Length == 0)
         {
-            var runner = modelRunner as IAgeRegressorRunner;
-            if (runner == null)
-            {
-                Debug.LogWarning("EfficientNetSnapshotPredictor: Assigned modelRunner does not implement IAgeRegressorRunner.");
-                return FindAnyModelRunner();
-            }
-            return runner;
+            return null;
         }
 
-        return FindAnyModelRunner();
+        m_activeRunnerIndex = Mathf.Clamp(m_activeRunnerIndex, 0, modelRunners.Length - 1);
+
+        var selectedBehaviour = modelRunners[m_activeRunnerIndex];
+        if (selectedBehaviour is IAgeRegressorRunner selectedRunner)
+        {
+            return selectedRunner;
+        }
+
+        Debug.LogWarning("EfficientNetSnapshotPredictor: Selected model runner does not implement IAgeRegressorRunner; searching other assigned runners.");
+        for (var i = 0; i < modelRunners.Length; i++)
+        {
+            if (modelRunners[i] is IAgeRegressorRunner candidate)
+            {
+                m_activeRunnerIndex = i;
+                return candidate;
+            }
+        }
+
+        Debug.LogWarning("EfficientNetSnapshotPredictor: None of the assigned model runners implement IAgeRegressorRunner.");
+        return null;
     }
 
     private IAgeRegressorRunner FindAnyModelRunner()
@@ -547,7 +578,8 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
         {
             if (behaviours[i] is IAgeRegressorRunner candidate)
             {
-                modelRunner = behaviours[i];
+                modelRunners = new[] { behaviours[i] };
+                m_activeRunnerIndex = 0;
                 return candidate;
             }
         }
