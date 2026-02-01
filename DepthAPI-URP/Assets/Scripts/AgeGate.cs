@@ -27,6 +27,45 @@ public sealed class AgeGate : MonoBehaviour
     public bool LastAdmitted { get; private set; }
     public bool HasResult { get; private set; }
 
+    /// <summary>
+    /// Set policy directly via enum.
+    /// </summary>
+    public void SetPolicy(Policy policy)
+    {
+        m_policy = policy;
+        UpdateStatusText();
+    }
+
+    /// <summary>
+    /// Set policy using an index (0 = AdultOnly, 1 = ChildOnly). Out-of-range values are clamped.
+    /// </summary>
+    public void SetPolicyIndex(int index)
+    {
+        var clamped = Mathf.Clamp(index, 0, 1);
+        m_policy = clamped == 0 ? Policy.AdultOnly : Policy.ChildOnly;
+        UpdateStatusText();
+    }
+
+    /// <summary>Convenience: set to AdultOnly policy.</summary>
+    public void SetAdultPolicy()
+    {
+        m_policy = Policy.AdultOnly;
+        UpdateStatusText();
+    }
+
+    /// <summary>Convenience: set to ChildOnly policy.</summary>
+    public void SetChildPolicy()
+    {
+        m_policy = Policy.ChildOnly;
+        UpdateStatusText();
+    }
+
+    public void SetTau(float value)
+    {
+        m_tau = Mathf.Clamp01(value);
+        UpdateStatusText();
+    }
+
     public void EvaluateBatchMeans(float mean, float logVariance)
     {
         var admitted = Evaluate(mean, logVariance);
