@@ -33,6 +33,11 @@ public class HandDorsalFacingCamera : MonoBehaviour
     public bool RightHasData { get; private set; }
     public float FacingDotThreshold => m_facingDotThreshold;
 
+    public void SetFacingDotThreshold(float value)
+    {
+        m_facingDotThreshold = Mathf.Clamp(value, -1f, 1f);
+    }
+
     private string m_lastStatus;
 
     private void Update()

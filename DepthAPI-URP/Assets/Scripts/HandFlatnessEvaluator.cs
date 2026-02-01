@@ -24,6 +24,11 @@ public class HandFlatnessEvaluator : MonoBehaviour
     public float RightRms { get; private set; }
     public float FlatnessThreshold => m_flatnessThreshold;
 
+    public void SetFlatnessThreshold(float value)
+    {
+        m_flatnessThreshold = Mathf.Max(0f, value);
+    }
+
     private readonly float[] m_covariance = new float[9];
     private readonly float[] m_eigenVectors = new float[9];
     private string m_lastStatus;
