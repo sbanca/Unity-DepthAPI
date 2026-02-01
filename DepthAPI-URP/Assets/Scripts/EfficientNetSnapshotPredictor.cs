@@ -58,6 +58,16 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
     [Header("Mask Filters")]
     [SerializeField, Range(0f, 1f)] private float m_minMaskCoverage;
 
+    public void SetMinBrightness(float value)
+    {
+        m_minBrightness = Mathf.Clamp01(value);
+    }
+
+    public void SetMinMaskCoverage(float value)
+    {
+        m_minMaskCoverage = Mathf.Clamp01(value);
+    }
+
     [Header("Landmark Overlay")]
     [SerializeField] private bool m_overlayLandmarks;
     [SerializeField] private MaskLandmarkRunner m_landmarkRunner;
