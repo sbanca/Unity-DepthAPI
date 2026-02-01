@@ -22,6 +22,7 @@ public sealed class AgeGate : MonoBehaviour
 
     [Header("Output")]
     [SerializeField] private TMP_Text m_statusTmpText;
+    [SerializeField] private TMP_Text[] m_probabilityOutputs;
 
     public float LastPAdult { get; private set; }
     public bool LastAdmitted { get; private set; }
@@ -140,18 +141,32 @@ public sealed class AgeGate : MonoBehaviour
 
     private void UpdateStatusText()
     {
-        if (m_statusTmpText == null)
+        var pAdultText = HasResult ? $"{LastPAdult:0.###}" : "N/A";
+        var pAdultPercent = HasResult ? $"{LastPAdult * 100f:0.#}%" : "N/A";
+        var policyText = m_policy == Policy.ChildOnly ? "Children only" : "Adults only";
+
+        if (m_statusTmpText != null)
         {
-            return;
+            m_statusTmpText.text =
+                $"Policy: {policyText}\n" +
+                $"Adult probability: {pAdultText}\n" +
+                $"Decision threshold (tau): {m_tau:0.###}\n" +
+                $"Adult age threshold: {m_ageThreshold:0.###}";
         }
 
-        var pAdultText = HasResult ? $"{LastPAdult:0.###}" : "N/A";
-        var policyText = m_policy == Policy.ChildOnly ? "Children only" : "Adults only";
-        m_statusTmpText.text =
-            $"Policy: {policyText}\n" +
-            $"Adult probability: {pAdultText}\n" +
-            $"Decision threshold (tau): {m_tau:0.###}\n" +
-            $"Adult age threshold: {m_ageThreshold:0.###}";
+        if (m_probabilityOutputs != null)
+        {
+            for (var i = 0; i < m_probabilityOutputs.Length; i++)
+            {
+                var tmp = m_probabilityOutputs[i];
+                if (tmp == null)
+                {
+                    continue;
+                }
+
+                tmp.text = $"{pAdultPercent}";
+            }
+        }
     }
 
     /// <summary>
