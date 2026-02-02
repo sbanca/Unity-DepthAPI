@@ -31,6 +31,8 @@ public sealed class InferenceManager : MonoBehaviour
     [Header("Output")]
     [SerializeField] private Text m_batchText;
     [SerializeField] private TMP_Text m_batchTmpText;
+    [SerializeField] private Text m_collectionText;
+    [SerializeField] private TMP_Text m_collectionTmpText;
     [SerializeField] private BatchMeansEvent m_onBatchMeansReady;
     [SerializeField] private UnityEvent m_onBatchCaptured;
     [SerializeField] private UnityEvent m_onBatchInferenceCompleted;
@@ -39,6 +41,7 @@ public sealed class InferenceManager : MonoBehaviour
     private bool m_leftArmed = true;
     private bool m_rightArmed = true;
     private bool m_lastCaptureSucceeded;
+    private int m_discardedSamples;
     private readonly System.Collections.Generic.List<PendingSample> m_pendingSamples = new System.Collections.Generic.List<PendingSample>();
 
     private struct PendingSample
@@ -106,6 +109,8 @@ public sealed class InferenceManager : MonoBehaviour
     {
         m_isCollecting = true;
         m_pendingSamples.Clear();
+        m_discardedSamples = 0;
+        SetCollectionText(string.Empty);
 
         if (m_collector != null)
         {
@@ -141,6 +146,7 @@ public sealed class InferenceManager : MonoBehaviour
         m_collector.Complete();
         m_isCollecting = false;
 
+        SetCollectionText(string.Empty);
         UpdateBatchText();
         InvokeBatchMeansEvent();
 
@@ -198,6 +204,10 @@ public sealed class InferenceManager : MonoBehaviour
                 });
                 m_lastCaptureSucceeded = true;
             }
+            else
+            {
+                m_lastCaptureSucceeded = false;
+            }
         }
 
         m_predictor.CaptureInputPng = previousCapturePng;
@@ -221,6 +231,11 @@ public sealed class InferenceManager : MonoBehaviour
 
             yield return CaptureOnce(hand);
             consecutiveFailures = m_lastCaptureSucceeded ? 0 : consecutiveFailures + 1;
+            if (!m_lastCaptureSucceeded)
+            {
+                m_discardedSamples++;
+            }
+            UpdateCollectionText(hand);
 
             if (m_collector == null || !m_collector.IsCollecting)
             {
@@ -308,6 +323,8 @@ public sealed class InferenceManager : MonoBehaviour
         m_isCollecting = false;
         m_leftArmed = true;
         m_rightArmed = true;
+        m_discardedSamples = 0;
+        SetCollectionText(string.Empty);
 
         if (m_collector != null)
         {
@@ -333,7 +350,8 @@ public sealed class InferenceManager : MonoBehaviour
         var count = m_collector.Count;
         if (count <= 0)
         {
-            SetBatchText("Batch: No samples");
+            var discardedSuffix = m_discardedSamples > 0 ? $" (Discarded: {m_discardedSamples})" : string.Empty;
+            SetBatchText($"Batch: No samples{discardedSuffix}");
             return;
         }
 
@@ -348,6 +366,7 @@ public sealed class InferenceManager : MonoBehaviour
 
         var text =
             $"Batch: {count} (L {leftCount}/{leftTarget}, R {rightCount}/{rightTarget})\n" +
+            $"Collected: {count}, Discarded: {m_discardedSamples}\n" +
             $"Mean: {mean:0.###}\n" +
             $"LogVar: {logVar:0.###}\n" +
             $"StdDev: {stdDev:0.###}\n" +
@@ -377,6 +396,40 @@ public sealed class InferenceManager : MonoBehaviour
         if (m_batchText != null)
         {
             m_batchText.text = text;
+        }
+    }
+
+    private void UpdateCollectionText(HandScore.HandSelection hand)
+    {
+        if ((m_collectionText == null && m_collectionTmpText == null) || m_collector == null)
+        {
+            return;
+        }
+
+        var leftCount = m_collector.LeftCount;
+        var rightCount = m_collector.RightCount;
+        var leftTarget = m_collector.LeftTargetCount;
+        var rightTarget = m_collector.RightTargetCount;
+        if (hand == HandScore.HandSelection.Left)
+        {
+            SetCollectionText($"L {leftCount}/{leftTarget}");
+        }
+        else
+        {
+            SetCollectionText($"R {rightCount}/{rightTarget}");
+        }
+    }
+
+    private void SetCollectionText(string text)
+    {
+        if (m_collectionTmpText != null)
+        {
+            m_collectionTmpText.text = text;
+        }
+
+        if (m_collectionText != null)
+        {
+            m_collectionText.text = text;
         }
     }
 }
