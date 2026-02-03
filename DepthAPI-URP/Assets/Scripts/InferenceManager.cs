@@ -340,6 +340,20 @@ public sealed class InferenceManager : MonoBehaviour
         enabled = true;
     }
 
+    public void SetPredictionsPerBatch(int predictionsPerHand)
+    {
+        var clamped = Mathf.Max(0, predictionsPerHand);
+        m_leftPredictionsPerBatch = clamped;
+        m_rightPredictionsPerBatch = clamped;
+        UpdateBatchText();
+
+        if (m_handScore != null)
+        {
+            var nextHand = m_leftPredictionsPerBatch > 0 ? HandScore.HandSelection.Left : HandScore.HandSelection.Right;
+            m_handScore.SetHandSelection(nextHand);
+        }
+    }
+
     private void UpdateBatchText()
     {
         if ((m_batchText == null && m_batchTmpText == null) || m_collector == null)
