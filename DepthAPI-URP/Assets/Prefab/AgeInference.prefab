@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8123041964413474409}
   - component: {fileID: 950690628336309849}
   - component: {fileID: 4037886990658711731}
+  - component: {fileID: 1701146951769855606}
   - component: {fileID: 8944081038514860796}
   - component: {fileID: 5757450870191538948}
   - component: {fileID: 7527651443240726995}
@@ -64,7 +65,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3657254597569055560}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 44a9b2b4267444c45beca8611fee0f7b, type: 3}
   m_Name: 
@@ -107,6 +108,29 @@ MonoBehaviour:
   m_backend: 257
   m_variant: v2_m
   m_overrideInputSize: 0
+--- !u!114 &1701146951769855606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3657254597569055560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67896a456df013c42b8bfe09431a730c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RunPodAgeRegressorRunner
+  m_endpointId: c73swcwg7pdvpd
+  m_apiKey: rpa_QGV2WABU4JLLXS8CZOYXIZJ7DVMEI4Q7LJ38WPQ51f7d6p
+  m_apiKeyEnvVar: RUNPOD_API_KEY
+  m_baseUrl: https://api.runpod.ai/v2
+  m_timeoutMs: 15000
+  m_inputWidth: 480
+  m_inputHeight: 480
+  m_sendAsDataUrl: 1
+  m_encodeAsJpg: 1
+  m_jpgQuality: 90
+  m_outputIsStd: 1
 --- !u!114 &8944081038514860796
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,6 +148,7 @@ MonoBehaviour:
   - {fileID: 3217907455101476305}
   - {fileID: 950690628336309849}
   - {fileID: 4037886990658711731}
+  - {fileID: 1701146951769855606}
   m_activeRunnerIndex: 0
   m_resultText: {fileID: 0}
   m_captureInputPng: 0
