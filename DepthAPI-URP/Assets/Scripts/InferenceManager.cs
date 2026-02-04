@@ -277,7 +277,19 @@ public sealed class InferenceManager : MonoBehaviour
                     continue;
                 }
 
-                if (m_predictor.TryPredictTexture(tex, out var mean, out var logVar, out var inferenceMs))
+                var success = false;
+                var mean = 0f;
+                var logVar = 0f;
+                var inferenceMs = -1f;
+                yield return m_predictor.TryPredictTextureAsync(tex, (ok, m, l, ms) =>
+                {
+                    success = ok;
+                    mean = m;
+                    logVar = l;
+                    inferenceMs = ms;
+                });
+
+                if (success)
                 {
                     m_collector.UpdateSampleInference(pending.CollectorIndex, mean, logVar, inferenceMs);
                 }

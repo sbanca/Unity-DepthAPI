@@ -1,6 +1,7 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.InferenceEngine;
 using UnityEngine;
@@ -96,6 +97,13 @@ public sealed class EfficientNetV2SmallAgeRegressorRunner : MonoBehaviour, IAgeR
     public bool TryPredict(Texture input, out float mean, out float logVariance, out float inferenceMs)
     {
         return TryPredictInternal(input, out mean, out logVariance, out _, out inferenceMs, false);
+    }
+
+    public IEnumerator TryPredictAsync(Texture input, System.Action<bool, float, float, float> onCompleted)
+    {
+        var success = TryPredict(input, out var mean, out var logVariance, out var inferenceMs);
+        onCompleted?.Invoke(success, mean, logVariance, inferenceMs);
+        yield break;
     }
 
     public bool TryPredict(Texture input, out float mean, out float logVariance, out float[] embedding, out float inferenceMs)

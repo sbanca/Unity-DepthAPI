@@ -1,6 +1,7 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.InferenceEngine;
 using UnityEngine;
@@ -146,6 +147,13 @@ public sealed class EfficientNetAgeRegressorRunner : MonoBehaviour, IAgeRegresso
         inferenceMs = (float)stopwatch.Elapsed.TotalMilliseconds;
         LastInferenceMs = inferenceMs;
         return true;
+    }
+
+    public IEnumerator TryPredictAsync(Texture input, System.Action<bool, float, float, float> onCompleted)
+    {
+        var success = TryPredict(input, out var mean, out var logVariance, out var inferenceMs);
+        onCompleted?.Invoke(success, mean, logVariance, inferenceMs);
+        yield break;
     }
 
     public static bool TryGetInputSize(string variant, out int size)

@@ -1,5 +1,6 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 
+using System;
 using System.Collections;
 using PassthroughCameraSamples;
 using UnityEngine;
@@ -570,6 +571,26 @@ public sealed class EfficientNetSnapshotPredictor : MonoBehaviour
         }
 
         return runner.TryPredict(input, out mean, out logVariance, out inferenceMs);
+    }
+
+    public IEnumerator TryPredictTextureAsync(Texture input, Action<bool, float, float, float> onCompleted)
+    {
+        var runner = ResolveModelRunner();
+        if (runner == null)
+        {
+            Debug.LogWarning("EfficientNetSnapshotPredictor: No IAgeRegressorRunner available for deferred inference.");
+            onCompleted?.Invoke(false, 0f, 0f, -1f);
+            yield break;
+        }
+
+        if (!runner.IsReady)
+        {
+            Debug.LogWarning("EfficientNetSnapshotPredictor: IAgeRegressorRunner is not ready for deferred inference.");
+            onCompleted?.Invoke(false, 0f, 0f, -1f);
+            yield break;
+        }
+
+        yield return runner.TryPredictAsync(input, onCompleted);
     }
 
     private IAgeRegressorRunner ResolveAssignedRunner()

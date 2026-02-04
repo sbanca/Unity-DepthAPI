@@ -1,6 +1,7 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 
 using System;
+using System.Collections;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -129,6 +130,106 @@ public sealed class RunPodAgeRegressorRunner : MonoBehaviour, IAgeRegressorRunne
         }
 
         return true;
+    }
+
+    public IEnumerator TryPredictAsync(Texture input, System.Action<bool, float, float, float> onCompleted)
+    {
+        var success = false;
+        var mean = 0f;
+        var logVariance = 0f;
+        var inferenceMs = -1f;
+        LastInferenceMs = -1f;
+
+        if (input == null)
+        {
+            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: input texture is null.");
+            onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
+            yield break;
+        }
+
+        if (!IsReady)
+        {
+            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: missing endpoint ID or API key.");
+            onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
+            yield break;
+        }
+
+        if (!TryEncodeTexture(input, out var imageBytes, out var mimeType))
+        {
+            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: failed to encode input texture.");
+            onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
+            yield break;
+        }
+
+        var apiKey = GetApiKey();
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: API key is empty.");
+            onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
+            yield break;
+        }
+
+        var imageBase64 = Convert.ToBase64String(imageBytes);
+        if (m_sendAsDataUrl)
+        {
+            imageBase64 = $"data:{mimeType};base64,{imageBase64}";
+        }
+
+        var requestPayload = JsonUtility.ToJson(new RunPodRequest
+        {
+            input = new RunPodInput
+            {
+                image_base64 = imageBase64
+            }
+        });
+
+        var url = BuildUrl();
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: invalid URL.");
+            onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
+            yield break;
+        }
+
+        using var request = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST);
+        var bodyBytes = Encoding.UTF8.GetBytes(requestPayload);
+        request.uploadHandler = new UploadHandlerRaw(bodyBytes);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("Authorization", $"Bearer {apiKey}");
+        request.timeout = TimeoutSeconds();
+
+        var stopwatch = Stopwatch.StartNew();
+        yield return request.SendWebRequest();
+        stopwatch.Stop();
+
+        inferenceMs = (float)stopwatch.Elapsed.TotalMilliseconds;
+        LastInferenceMs = inferenceMs;
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: request failed ({request.responseCode}): {request.error}");
+            onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
+            yield break;
+        }
+
+        var responseText = request.downloadHandler.text;
+        if (string.IsNullOrWhiteSpace(responseText))
+        {
+            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: empty response.");
+            onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
+            yield break;
+        }
+
+        if (!TryParseResponse(responseText, out mean, out logVariance))
+        {
+            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: failed to parse response.");
+            onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
+            yield break;
+        }
+
+        success = true;
+        onCompleted?.Invoke(success, mean, logVariance, inferenceMs);
     }
 
     private int TimeoutSeconds()
