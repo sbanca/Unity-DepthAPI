@@ -120,14 +120,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67896a456df013c42b8bfe09431a730c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunPodAgeRegressorRunner
-  m_endpointId: c73swcwg7pdvpd
-  m_apiKey: rpa_QGV2WABU4JLLXS8CZOYXIZJ7DVMEI4Q7LJ38WPQ51f7d6p
-  m_apiKeyEnvVar: RUNPOD_API_KEY
-  m_baseUrl: https://api.runpod.ai/v2
+  m_endpointId:
+  m_apiKey:
+  m_apiKeyEnvVar:
+  m_baseUrl:
   m_timeoutMs: 15000
   m_inputWidth: 480
   m_inputHeight: 480
-  m_sendAsDataUrl: 1
+  m_sendAsDataUrl: 0
   m_encodeAsJpg: 1
   m_jpgQuality: 90
   m_outputIsStd: 1

@@ -12,17 +12,15 @@ using Stopwatch = System.Diagnostics.Stopwatch;
 
 public sealed class RunPodAgeRegressorRunner : MonoBehaviour, IAgeRegressorRunner
 {
+    private const string k_FirebaseUrl = "https://webage-3176e.web.app/api/runpod";
+
     [Header("RunPod")]
-    [SerializeField] private string m_endpointId;
-    [SerializeField] private string m_apiKey;
-    [SerializeField] private string m_apiKeyEnvVar = "RUNPOD_API_KEY";
-    [SerializeField] private string m_baseUrl = "https://api.runpod.ai/v2";
     [SerializeField, Min(0f)] private float m_timeoutMs = 15000f;
 
     [Header("Input")]
     [SerializeField, Min(1)] private int m_inputWidth = 384;
     [SerializeField, Min(1)] private int m_inputHeight = 384;
-    [SerializeField] private bool m_sendAsDataUrl = true;
+    [SerializeField] private bool m_sendAsDataUrl = false;
     [SerializeField] private bool m_encodeAsJpg;
     [SerializeField, Range(1, 100)] private int m_jpgQuality = 90;
 
@@ -30,7 +28,7 @@ public sealed class RunPodAgeRegressorRunner : MonoBehaviour, IAgeRegressorRunne
     [SerializeField] private bool m_outputIsStd = true;
 
     public Vector2Int InputSize => new Vector2Int(m_inputWidth, m_inputHeight);
-    public bool IsReady => !string.IsNullOrWhiteSpace(m_endpointId) && !string.IsNullOrWhiteSpace(GetApiKey());
+    public bool IsReady => true;
     public float LastInferenceMs { get; private set; } = -1f;
 
     public bool TryPredict(Texture input, out float mean, out float logVariance)
@@ -51,22 +49,9 @@ public sealed class RunPodAgeRegressorRunner : MonoBehaviour, IAgeRegressorRunne
             return false;
         }
 
-        if (!IsReady)
-        {
-            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredict)}: missing endpoint ID or API key.");
-            return false;
-        }
-
         if (!TryEncodeTexture(input, out var imageBytes, out var mimeType))
         {
             Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredict)}: failed to encode input texture.");
-            return false;
-        }
-
-        var apiKey = GetApiKey();
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredict)}: API key is empty.");
             return false;
         }
 
@@ -84,19 +69,11 @@ public sealed class RunPodAgeRegressorRunner : MonoBehaviour, IAgeRegressorRunne
             }
         });
 
-        var url = BuildUrl();
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredict)}: invalid URL.");
-            return false;
-        }
-
-        using var request = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST);
+        using var request = new UnityWebRequest(k_FirebaseUrl, UnityWebRequest.kHttpVerbPOST);
         var bodyBytes = Encoding.UTF8.GetBytes(requestPayload);
         request.uploadHandler = new UploadHandlerRaw(bodyBytes);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("Authorization", $"Bearer {apiKey}");
         request.timeout = TimeoutSeconds();
 
         var stopwatch = Stopwatch.StartNew();
@@ -147,24 +124,9 @@ public sealed class RunPodAgeRegressorRunner : MonoBehaviour, IAgeRegressorRunne
             yield break;
         }
 
-        if (!IsReady)
-        {
-            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: missing endpoint ID or API key.");
-            onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
-            yield break;
-        }
-
         if (!TryEncodeTexture(input, out var imageBytes, out var mimeType))
         {
             Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: failed to encode input texture.");
-            onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
-            yield break;
-        }
-
-        var apiKey = GetApiKey();
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: API key is empty.");
             onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
             yield break;
         }
@@ -183,20 +145,11 @@ public sealed class RunPodAgeRegressorRunner : MonoBehaviour, IAgeRegressorRunne
             }
         });
 
-        var url = BuildUrl();
-        if (string.IsNullOrWhiteSpace(url))
-        {
-            Debug.LogError($"{nameof(RunPodAgeRegressorRunner)}.{nameof(TryPredictAsync)}: invalid URL.");
-            onCompleted?.Invoke(false, mean, logVariance, inferenceMs);
-            yield break;
-        }
-
-        using var request = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST);
+        using var request = new UnityWebRequest(k_FirebaseUrl, UnityWebRequest.kHttpVerbPOST);
         var bodyBytes = Encoding.UTF8.GetBytes(requestPayload);
         request.uploadHandler = new UploadHandlerRaw(bodyBytes);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
-        request.SetRequestHeader("Authorization", $"Bearer {apiKey}");
         request.timeout = TimeoutSeconds();
 
         var stopwatch = Stopwatch.StartNew();
@@ -240,33 +193,6 @@ public sealed class RunPodAgeRegressorRunner : MonoBehaviour, IAgeRegressorRunne
         }
 
         return Mathf.Max(1, Mathf.CeilToInt(m_timeoutMs / 1000f));
-    }
-
-    private string BuildUrl()
-    {
-        if (string.IsNullOrWhiteSpace(m_endpointId))
-        {
-            return null;
-        }
-
-        var baseUrl = string.IsNullOrWhiteSpace(m_baseUrl) ? "https://api.runpod.ai/v2" : m_baseUrl.Trim().TrimEnd('/');
-        var endpoint = m_endpointId.Trim().Trim('/');
-        return $"{baseUrl}/{endpoint}/runsync";
-    }
-
-    private string GetApiKey()
-    {
-        if (!string.IsNullOrWhiteSpace(m_apiKey))
-        {
-            return m_apiKey.Trim();
-        }
-
-        if (!string.IsNullOrWhiteSpace(m_apiKeyEnvVar))
-        {
-            return Environment.GetEnvironmentVariable(m_apiKeyEnvVar)?.Trim();
-        }
-
-        return string.Empty;
     }
 
     private bool TryEncodeTexture(Texture input, out byte[] imageBytes, out string mimeType)

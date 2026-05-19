@@ -186019,7 +186019,7 @@ PrefabInstance:
     - target: {fileID: 1701146951769855606, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
       propertyPath: m_apiKey
-      value: rpa_QGV2WABU4JLLXS8CZOYXIZJ7DVMEI4Q7LJ38WPQ51f7d6p
+      value:
       objectReference: {fileID: 0}
     - target: {fileID: 3657254597569055560, guid: 2f320d8b4cfb476419a780ce145435aa,
         type: 3}
@@ -186252,14 +186252,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3a49dbc98b6ffc4e805c9aecab46bff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunPodAgeRegressorRunnerV2
-  m_endpointId: nxnujcmy34scxx
-  m_apiKey: rpa_QGV2WABU4JLLXS8CZOYXIZJ7DVMEI4Q7LJ38WPQ51f7d6p
-  m_apiKeyEnvVar: RUNPOD_API_KEY
-  m_baseUrl: https://api.runpod.ai/v2
+  m_endpointId:
+  m_apiKey:
+  m_apiKeyEnvVar:
+  m_baseUrl:
   m_timeoutMs: 15000
   m_inputWidth: 480
   m_inputHeight: 480
-  m_sendAsDataUrl: 1
+  m_sendAsDataUrl: 0
   m_encodeAsJpg: 0
   m_jpgQuality: 90
   m_selectedModelTag: v0.1-v2_m
